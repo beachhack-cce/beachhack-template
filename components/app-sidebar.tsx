@@ -53,7 +53,7 @@ const routes = {
     },
     {
       title: "Context",
-      url: "#",
+      url: "/dashboard/context",
       icon: IconListDetails,
     }
   ],

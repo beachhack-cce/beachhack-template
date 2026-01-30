@@ -3,7 +3,7 @@ import { getSessionCookie } from "better-auth/cookies";
 
 const authRoutes = ["/login", "/register"];
 
-const protectedRoutes = ["/dashboard"];
+const protectedRoutes = ["/dashboard/*,/"];
 
 export async function proxy(request: NextRequest, response: NextResponse) {
   const session = getSessionCookie(request, {

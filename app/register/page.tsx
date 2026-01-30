@@ -38,7 +38,7 @@ export default function page() {
     
           if (data) {
             Cookies.set("email",email);
-            router.push('/');
+            router.push('/dashboard');
           }
         } catch (err) {
           setError('An unexpected error occurred. Please try again.');

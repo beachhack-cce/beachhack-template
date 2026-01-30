@@ -7,7 +7,8 @@ import {
   IconNotification,
   IconUserCircle,
 } from "@tabler/icons-react"
-import React from "react"
+import React from "react";
+import { signOut } from "@/lib/auth-client";
 import {
   Avatar,
   AvatarFallback,
@@ -21,14 +22,16 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
+import { useRouter } from "next/navigation";
+
+ 
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import Cookies from 'js-cookie';  
 export function NavUser({
   user,
 }: {
@@ -42,14 +45,13 @@ export function NavUser({
     emailVerified: boolean,
   }
 }) {
-  const { isMobile } = useSidebar()
-  const[email,setEmail]=React.useState("");
-  React.useEffect(()=>{
-    const storedEmail=Cookies.get("email");
-    if(storedEmail){
-      setEmail(storedEmail);
-    }
-  },[]);
+  const { isMobile } = useSidebar();
+  const router = useRouter();
+  const handleLogout = async () => {
+    await signOut();
+    router.push("/login");
+    router.refresh();
+  };
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -60,7 +62,7 @@ export function NavUser({
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg grayscale">
-                <AvatarImage src={user.avatar} alt={user.name} />
+                <AvatarImage src={user.image} alt={user.name} />
                 <AvatarFallback className="rounded-lg">CN</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
@@ -87,12 +89,12 @@ export function NavUser({
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{user.name}</span>
                   <span className="text-muted-foreground truncate text-xs">
-                    {email}
+                    {user.email}
                   </span>
                 </div>
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuItem onClick={()=>{Cookies.remove("papersession")}}>
+            <DropdownMenuItem onClick={handleLogout}>
               <IconLogout />
               Log out
             </DropdownMenuItem>
