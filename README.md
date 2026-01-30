@@ -42,15 +42,86 @@ Our solution focuses on:
 
 ## 🧠 Core Idea: Decision Trace First
 
-Explainability is **not added later**.
+Explainability is **not added later** in this system.  
+The architecture is built around a **Decision Trace Engine** that records *how* every decision is made.
 
-The system is built around a **Decision Trace Engine** that records:
+For every alert, the system explicitly records:
 - what was evaluated,
-- which rules fired,
-- how risk evolved,
+- which rules were checked and triggered,
+- how risk evolved step by step,
 - why the final decision occurred.
 
-Everything else (explanations, actions, learning) is built **on top of the trace**.
+All other components — explanations, maintenance actions, and learning — are built **on top of this decision trace**.
+
+---
+
+### 🔍 Why Decision Trace (and Why Not Traditional XAI)
+
+Most explainable AI (XAI) techniques attempt to explain a decision **after it has already happened**.  
+While useful for understanding model behavior, they are not sufficient for **industrial decision systems** where trust, auditability, and actionability are critical.
+
+This project uses a **Decision Trace–first approach** for the following reasons.
+
+---
+
+### ✅ Why Decision Trace
+
+- **Execution‑based explainability**  
+  The Decision Trace records the *actual reasoning path* taken by the system, step by step, instead of approximating it after the fact.
+
+- **Deterministic and replayable**  
+  Given the same inputs, the system produces the same trace.  
+  This allows decisions to be:
+  - replayed,
+  - audited,
+  - debugged.
+
+- **Captures logic, not just correlations**  
+  Industrial systems rely on rules, thresholds, and workflows.  
+  Decision traces explicitly capture:
+  - which rules were evaluated,
+  - which rules fired,
+  - how confidence and risk evolved.
+
+- **Directly exposes logical errors**  
+  When the system’s expected outcome does not match real‑world behavior, the trace shows *where the reasoning diverged*, instead of hiding the mistake.
+
+- **Single source of truth**  
+  Explanations, maintenance actions, and feedback all reference the same trace, ensuring consistency across the system.
+
+---
+
+### ❌ Why Not Traditional XAI (Alone)
+
+- **Post‑hoc, not causal**  
+  Traditional XAI explains *what influenced* a decision, not *how the decision was actually made*.
+
+- **Approximate by nature**  
+  Feature attribution methods estimate influence; they do not record execution steps.
+
+- **Limited auditability**  
+  XAI does not naturally capture:
+  - rule sequences,
+  - intermediate reasoning states,
+  - workflow logic.
+
+- **Weak actionability**  
+  Knowing which feature mattered most does not explain:
+  - why a maintenance action was chosen,
+  - or why it was triggered at that specific time.
+
+---
+
+### 🧩 Final Design Choice
+
+> **Decision Traces serve as the ground truth for system reasoning.  
+Explainability models are used only to translate these traces into human‑understandable language.**
+
+This makes the system:
+- transparent,
+- auditable,
+- trustworthy,
+- and suitable for real industrial deployment.
 
 ---
 
