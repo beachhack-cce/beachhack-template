@@ -1,49 +1,72 @@
-# BeachHack Template Repository
+# RiskBoard
 
-![BeachHack Banner](https://github.com/user-attachments/assets/b46c3336-f9eb-473a-ba76-bcf5c0f29d0d)
+## Track
+Cybersecurity & Threat Intelligence
 
-Official starter template repository for **BeachHack** hackathon participants.
+## Problem Statement
+Modern security teams face extreme alert overload. Thousands of vulnerabilities,
+alerts, and threat indicators are generated daily, but most lack the necessary
+context to determine real business impact.
 
----
+Security alerts are typically evaluated in isolation, without considering:
+- The business criticality of affected assets
+- Real-world exploitability of threats
+- Operational and organizational impact
 
-## 📌 Instructions
-
-All teams must **fork this repository** at the start of the hackathon and use the forked repository for all development work. Use of personal or pre-existing repositories is not allowed.
-
-You are **not restricted to the track or domain** you submitted your initial idea under. Teams are free to choose **any of the released problem statements**.
-
----
-
-## ⏱️ Important Rules
-
-- All development must begin **after forking** this repository.
-- The problem statements were shared in advance **only for ideation and planning**.
-- **No pre-built or pre-developed solutions** are allowed in any form.
-- Commit history and repository metadata will be actively reviewed.
-- Any violation of these rules may result in **immediate disqualification**.
+This leads to alert fatigue, inefficient resource usage, and delayed response to
+critical risks.
 
 ---
 
-## 🛠️ Project Setup
+## Solution Overview
+RiskBoard is a **context-aware threat prioritization platform** that helps security
+teams focus on what truly matters.
 
-This repository does **not enforce any folder structure or technology stack**.  
-Teams are free to organize their project and choose tools, frameworks, and platforms as required by their solution.
+Instead of treating all alerts equally, RiskBoard correlates security threats with
+organizational context and business importance to produce a ranked list of
+**“Top Risks Right Now.”**
 
----
-
-## 📤 Submission Guidelines
-
-Your forked repository will be considered your final submission.  
-Ensure your repository includes a clear README describing:
-- Selected problem statement
-- Project overview
-- Technical approach
-- Setup instructions
-- Demo links
-- Screenshots
+The goal is simple:  
+**Show security teams exactly what to fix first and why.**
 
 ---
 
-Good luck, and happy hacking 🚀  
-**– Team BeachHack**
+## Key Features
+- Asset inventory with business criticality scoring
+- Threat intake with severity and exploitability attributes
+- Deterministic risk scoring engine
+- Real-time ranked risk dashboard
+- Actionable remediation recommendations
+
+---
+
+## How It Works
+1. Assets are registered with defined business importance
+2. Security threats are ingested or simulated with severity data
+3. Threats are correlated with affected assets
+4. A contextual risk score is calculated
+5. Risks are dynamically ranked based on business impact
+6. Clear remediation guidance is provided for high-priority risks
+
+---
+
+## Tech Stack
+- Frontend: React
+- Backend: Node.js, Express
+- Database: MongoDB
+- Visualization: Dashboard charts and tables
+
+---
+
+## Impact
+RiskBoard enables organizations to:
+- Reduce alert fatigue
+- Prioritize threats based on real business risk
+- Improve incident response decision-making
+- Align security actions with operational impact
+
+---
+
+## Team
+Built during the BeachHack Hackathon.
 
