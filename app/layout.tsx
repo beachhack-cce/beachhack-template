@@ -21,7 +21,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${tomorrow.className} antialiased`}>
+      <body className={`${tomorrow.className} antialiased bg-black`}>
         <TRPCProvider>
           {children}
         </TRPCProvider>

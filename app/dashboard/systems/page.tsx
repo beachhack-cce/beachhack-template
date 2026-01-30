@@ -24,7 +24,6 @@ function Systems() {
   const [copied, setCopied] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  // Fetch hosts on component mount
   useEffect(() => {
     fetchHosts();
   }, []);
@@ -39,7 +38,6 @@ function Systems() {
       }
     } catch (error) {
       console.error("Failed to fetch hosts:", error);
-      // Mock data for demonstration
       setHosts([
         {
           id: "1",
@@ -83,7 +81,6 @@ function Systems() {
   };
 
   const handleFinishAdd = async () => {
-    // Add the host with pending status
     const mockHost: Host = {
       id: Date.now().toString(),
       name: newHostName,
@@ -113,7 +110,6 @@ function Systems() {
     if (!selectedHost) return;
 
     try {
-      // Replace with your actual API endpoint
       const response = await fetch(`/api/hosts/${selectedHost.id}`, {
         method: "DELETE",
       });
@@ -123,7 +119,6 @@ function Systems() {
       }
     } catch (error) {
       console.error("Failed to delete host:", error);
-      // Mock delete for demonstration
       setHosts(hosts.filter((h) => h.id !== selectedHost.id));
     }
 
@@ -182,7 +177,7 @@ function Systems() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-green-400 p-6">
+    <div className="min-h-screen bg-gradient-to-bl from-black via-green-950/80 to-black text-green-400 p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-green-500">Systems</h1>
         <button
