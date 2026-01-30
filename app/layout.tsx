@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Tomorrow } from "next/font/google";
 import "./globals.css";
+import { TRPCProvider } from "@/trpc/client"; // 👈 ADD THIS
 
 const tomorrow = Tomorrow({
   subsets: ["latin"],
@@ -15,13 +16,15 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
       <body className={`${tomorrow.className} antialiased`}>
-        {children}
+        <TRPCProvider>
+          {children}
+        </TRPCProvider>
       </body>
     </html>
   );
