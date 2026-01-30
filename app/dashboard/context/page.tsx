@@ -73,21 +73,21 @@ export default function ContextPage() {
   const isSaving = saveContextMutation.isPending;
 
   return (
-    <div className="min-h-screen bg-black p-4 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-black via-green-950/80 to-black p-4 md:p-8">
       <div className="mx-auto max-w-4xl">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-3">
-            <span className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-green-500/20 border border-green-500/30">
+            <span className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-green-500/20 border border-green-500/30 shadow-lg shadow-green-500/10">
               <Globe className="h-5 w-5 text-green-400" />
             </span>
-            Website Context Extractor
+            <span><span className="text-green-400">Context</span> Creation</span>
           </h1>
           <p className="text-gray-400 ml-13">
             Enter a website URL to automatically extract business or portfolio information using AI.
           </p>
         </div>
 
-        <Card className="mb-6 bg-gray-950 border-green-500/20 shadow-lg shadow-green-500/5">
+        <Card className="mb-6 bg-black/50 backdrop-blur-sm border-green-500/20 shadow-lg shadow-green-500/5">
           <CardHeader className="border-b border-green-500/10">
             <CardTitle className="flex items-center gap-2 text-white">
               <Globe className="h-5 w-5 text-green-400" />
@@ -104,7 +104,7 @@ export default function ContextPage() {
                 placeholder="https://example.com"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
-                className="flex-1 bg-black border-green-500/30 text-white placeholder:text-gray-500 focus:border-green-400 focus:ring-green-400/20"
+                className="flex-1 bg-black/60 border-green-500/30 text-white placeholder:text-gray-500 focus:border-green-400 focus:ring-green-400/20"
                 disabled={isAnalyzing}
               />
               <Button 
@@ -128,11 +128,11 @@ export default function ContextPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gray-950 border-green-500/20 shadow-lg shadow-green-500/5">
+        <Card className="bg-black/80 backdrop-blur-sm border-green-500/20 shadow-lg shadow-green-500/5">
           <CardHeader className="border-b border-green-500/10">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-white">Extracted Information</CardTitle>
+                <CardTitle className="text-white">Extracted <span className="text-green-400">Information</span></CardTitle>
                 <CardDescription className="text-gray-400">
                   Review and edit the automatically extracted information
                 </CardDescription>
@@ -162,7 +162,7 @@ export default function ContextPage() {
                 value={websiteInfo.name}
                 onChange={(e) => handleInputChange("name", e.target.value)}
                 disabled={isAnalyzing}
-                className="bg-black border-green-500/30 text-white placeholder:text-gray-500 focus:border-green-400 focus:ring-green-400/20"
+                className="bg-black/60 border-green-500/30 text-white placeholder:text-gray-500 focus:border-green-400 focus:ring-green-400/20"
               />
             </div>
 
@@ -177,7 +177,7 @@ export default function ContextPage() {
                 onChange={(e) => handleInputChange("description", e.target.value)}
                 rows={4}
                 disabled={isAnalyzing}
-                className="bg-black border-green-500/30 text-white placeholder:text-gray-500 focus:border-green-400 focus:ring-green-400/20 resize-none"
+                className="bg-black/60 border-green-500/30 text-white placeholder:text-gray-500 focus:border-green-400 focus:ring-green-400/20 resize-none"
               />
             </div>
 
@@ -191,7 +191,7 @@ export default function ContextPage() {
                 value={websiteInfo.industry}
                 onChange={(e) => handleInputChange("industry", e.target.value)}
                 disabled={isAnalyzing}
-                className="bg-black border-green-500/30 text-white placeholder:text-gray-500 focus:border-green-400 focus:ring-green-400/20"
+                className="bg-black/60 border-green-500/30 text-white placeholder:text-gray-500 focus:border-green-400 focus:ring-green-400/20"
               />
             </div>
 
@@ -206,7 +206,7 @@ export default function ContextPage() {
                 onChange={(e) => handleInputChange("services", e.target.value)}
                 rows={3}
                 disabled={isAnalyzing}
-                className="bg-black border-green-500/30 text-white placeholder:text-gray-500 focus:border-green-400 focus:ring-green-400/20 resize-none"
+                className="bg-black/60 border-green-500/30 text-white placeholder:text-gray-500 focus:border-green-400 focus:ring-green-400/20 resize-none"
               />
             </div>
 
@@ -222,7 +222,7 @@ export default function ContextPage() {
                   value={websiteInfo.contactEmail}
                   onChange={(e) => handleInputChange("contactEmail", e.target.value)}
                   disabled={isAnalyzing}
-                  className="bg-black border-green-500/30 text-white placeholder:text-gray-500 focus:border-green-400 focus:ring-green-400/20"
+                  className="bg-black/60 border-green-500/30 text-white placeholder:text-gray-500 focus:border-green-400 focus:ring-green-400/20"
                 />
               </div>
 
@@ -237,7 +237,7 @@ export default function ContextPage() {
                   value={websiteInfo.phone}
                   onChange={(e) => handleInputChange("phone", e.target.value)}
                   disabled={isAnalyzing}
-                  className="bg-black border-green-500/30 text-white placeholder:text-gray-500 focus:border-green-400 focus:ring-green-400/20"
+                  className="bg-black/60 border-green-500/30 text-white placeholder:text-gray-500 focus:border-green-400 focus:ring-green-400/20"
                 />
               </div>
             </div>
@@ -252,7 +252,7 @@ export default function ContextPage() {
                 value={websiteInfo.address}
                 onChange={(e) => handleInputChange("address", e.target.value)}
                 disabled={isAnalyzing}
-                className="bg-black border-green-500/30 text-white placeholder:text-gray-500 focus:border-green-400 focus:ring-green-400/20"
+                className="bg-black/60 border-green-500/30 text-white placeholder:text-gray-500 focus:border-green-400 focus:ring-green-400/20"
               />
             </div>
 
@@ -267,7 +267,7 @@ export default function ContextPage() {
                 onChange={(e) => handleInputChange("socialLinks", e.target.value)}
                 rows={3}
                 disabled={isAnalyzing}
-                className="bg-black border-green-500/30 text-white placeholder:text-gray-500 focus:border-green-400 focus:ring-green-400/20 resize-none"
+                className="bg-black/60 border-green-500/30 text-white placeholder:text-gray-500 focus:border-green-400 focus:ring-green-400/20 resize-none"
               />
             </div>
 

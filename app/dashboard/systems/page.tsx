@@ -24,7 +24,6 @@ function Systems() {
   const [copied, setCopied] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  // Fetch hosts on component mount
   useEffect(() => {
     fetchHosts();
   }, []);
@@ -39,7 +38,6 @@ function Systems() {
       }
     } catch (error) {
       console.error("Failed to fetch hosts:", error);
-      // Mock data for demonstration
       setHosts([
         {
           id: "1",
@@ -83,7 +81,6 @@ function Systems() {
   };
 
   const handleFinishAdd = async () => {
-    // Add the host with pending status
     const mockHost: Host = {
       id: Date.now().toString(),
       name: newHostName,
@@ -113,7 +110,6 @@ function Systems() {
     if (!selectedHost) return;
 
     try {
-      // Replace with your actual API endpoint
       const response = await fetch(`/api/hosts/${selectedHost.id}`, {
         method: "DELETE",
       });
@@ -123,7 +119,6 @@ function Systems() {
       }
     } catch (error) {
       console.error("Failed to delete host:", error);
-      // Mock delete for demonstration
       setHosts(hosts.filter((h) => h.id !== selectedHost.id));
     }
 
@@ -162,7 +157,7 @@ function Systems() {
   const getStatusText = (status: Host["status"]) => {
     switch (status) {
       case "online":
-        return "text-green-400";
+        return "text-white";
       case "offline":
         return "text-red-400";
       case "pending":
@@ -182,9 +177,9 @@ function Systems() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-green-400 p-6">
+    <div className="min-h-screen bg-gradient-to-bl from-black via-green-950/80 to-black text-white p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-green-500">Systems</h1>
+        <h1 className="text-2xl font-bold text-white">Systems</h1>
         <button
           onClick={() => setShowAddModal(true)}
           className="bg-green-600 hover:bg-green-700 text-black font-semibold px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
@@ -206,13 +201,12 @@ function Systems() {
         </button>
       </div>
 
-      {/* Hosts Grid */}
       {loading ? (
         <div className="flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
         </div>
       ) : hosts.length === 0 ? (
-        <div className="text-center py-12 text-green-600">
+        <div className="text-center py-12 text-slate-700/50">
           <p>No hosts added yet. Click "Add Host" to get started.</p>
         </div>
       ) : (
@@ -224,19 +218,19 @@ function Systems() {
               className="bg-gray-900 border border-green-800 rounded-lg p-4 cursor-pointer hover:border-green-500 hover:shadow-lg hover:shadow-green-900/50 transition-all"
             >
               <div className="flex items-center justify-between mb-2">
-                <h3 className="font-semibold text-lg text-green-400">{host.name}</h3>
+                <h3 className="font-semibold text-lg text-white">{host.name}</h3>
                 <span
                   className={`w-3 h-3 rounded-full ${getStatusColor(host.status)}`}
                   title={host.status}
                 ></span>
               </div>
               {host.ipAddress && (
-                <p className="text-green-600 text-sm font-mono">
+                <p className="text-white text-sm font-mono">
                   {host.ipAddress}
                 </p>
               )}
               {host.os && (
-                <p className="text-green-700 text-xs mt-1">
+                <p className="text-white text-xs mt-1">
                   {host.os}
                 </p>
               )}
@@ -250,19 +244,18 @@ function Systems() {
         </div>
       )}
 
-      {/* Add Host Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
           <div className="bg-gray-900 border border-green-700 rounded-lg p-6 w-full max-w-xl">
             {addStep === 1 ? (
               <>
-                <h2 className="text-xl font-bold mb-4 text-green-500">Add New Host</h2>
-                <p className="text-green-600 text-sm mb-4">
+                <h2 className="text-xl font-bold mb-4 text-white">Add New Host</h2>
+                <p className="text-white text-sm mb-4">
                   Enter a name for the host you want to add.
                 </p>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1 text-green-400">
+                    <label className="block text-sm font-medium mb-1 text-white">
                       Host Name
                     </label>
                     <input
@@ -270,7 +263,7 @@ function Systems() {
                       value={newHostName}
                       onChange={(e) => setNewHostName(e.target.value)}
                       onKeyDown={(e) => e.key === "Enter" && handleNextStep()}
-                      className="w-full px-3 py-2 bg-black border border-green-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-green-400 placeholder-green-800"
+                      className="w-full px-3 py-2 bg-black border border-green-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-white placeholder-green-800"
                       placeholder="e.g., Production Server"
                       autoFocus
                     />
@@ -279,14 +272,14 @@ function Systems() {
                 <div className="flex justify-end gap-3 mt-6">
                   <button
                     onClick={handleCloseModal}
-                    className="px-4 py-2 text-green-500 hover:bg-green-900/30 rounded-lg transition-colors"
+                    className="px-4 py-2 text-white hover:bg-green-900/30 rounded-lg transition-colors"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleNextStep}
                     disabled={!newHostName.trim()}
-                    className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-green-900 disabled:text-green-700 text-black font-semibold rounded-lg transition-colors"
+                    className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-green-900 disabled:text-white text-black font-semibold rounded-lg transition-colors"
                   >
                     Next
                   </button>
@@ -294,17 +287,17 @@ function Systems() {
               </>
             ) : (
               <>
-                <h2 className="text-xl font-bold mb-2 text-green-500">Install Agent</h2>
-                <p className="text-green-600 text-sm mb-4">
-                  Run this command on <span className="text-green-400 font-semibold">{newHostName}</span> to install the agent:
+                <h2 className="text-xl font-bold mb-2 text-white">Install Agent</h2>
+                <p className="text-white text-sm mb-4">
+                  Run this command on <span className="text-white font-semibold">{newHostName}</span> to install the agent:
                 </p>
                 <div className="relative">
-                  <pre className="bg-black border border-green-800 rounded-lg p-4 overflow-x-auto text-sm font-mono text-green-400 whitespace-pre-wrap break-all">
+                  <pre className="bg-black border border-green-800 rounded-lg p-4 overflow-x-auto text-sm font-mono text-white whitespace-pre-wrap break-all">
                     {getCurlCommand()}
                   </pre>
                 </div>
                 <div className="mt-4 p-3 bg-green-900/20 border border-green-800 rounded-lg">
-                  <p className="text-green-500 text-xs">
+                  <p className="text-white text-xs">
                     <span className="font-bold">Note:</span> The host will appear with "pending" status until the agent connects. Make sure the target server has curl and bash installed.
                   </p>
                 </div>
@@ -328,15 +321,14 @@ function Systems() {
         </div>
       )}
 
-      {/* Host Preview Modal */}
       {selectedHost && !showDeleteConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
           <div className="bg-gray-900 border border-green-700 rounded-lg p-6 w-full max-w-lg">
             <div className="flex justify-between items-start mb-4">
-              <h2 className="text-xl font-bold text-green-500">{selectedHost.name}</h2>
+              <h2 className="text-xl font-bold text-white">{selectedHost.name}</h2>
               <button
                 onClick={() => setSelectedHost(null)}
-                className="text-green-600 hover:text-green-400 transition-colors"
+                className="text-white hover:text-white transition-colors"
               >
                 <svg
                   className="w-6 h-6"
@@ -355,7 +347,7 @@ function Systems() {
             </div>
             <div className="space-y-3">
               <div className="flex justify-between py-2 border-b border-green-900">
-                <span className="text-green-600">Status</span>
+                <span className="text-white">Status</span>
                 <span className="flex items-center gap-2">
                   <span
                     className={`w-2 h-2 rounded-full ${getStatusColor(selectedHost.status)}`}
@@ -367,24 +359,24 @@ function Systems() {
               </div>
               {selectedHost.ipAddress && (
                 <div className="flex justify-between py-2 border-b border-green-900">
-                  <span className="text-green-600">IP Address</span>
-                  <span className="font-mono text-green-400">{selectedHost.ipAddress}</span>
+                  <span className="text-white">IP Address</span>
+                  <span className="font-mono text-white">{selectedHost.ipAddress}</span>
                 </div>
               )}
               {selectedHost.os && (
                 <div className="flex justify-between py-2 border-b border-green-900">
-                  <span className="text-green-600">Operating System</span>
-                  <span className="text-green-400">{selectedHost.os}</span>
+                  <span className="text-white">Operating System</span>
+                  <span className="text-white">{selectedHost.os}</span>
                 </div>
               )}
               <div className="flex justify-between py-2 border-b border-green-900">
-                <span className="text-green-600">Date Added</span>
-                <span className="text-green-400">{formatDate(selectedHost.createdAt)}</span>
+                <span className="text-white">Date Added</span>
+                <span className="text-white">{formatDate(selectedHost.createdAt)}</span>
               </div>
               {selectedHost.lastSeen && (
                 <div className="flex justify-between py-2 border-b border-green-900">
-                  <span className="text-green-600">Last Seen</span>
-                  <span className="text-green-400">
+                  <span className="text-white">Last Seen</span>
+                  <span className="text-white">
                     {new Date(selectedHost.lastSeen).toLocaleString()}
                   </span>
                 </div>
@@ -428,7 +420,6 @@ function Systems() {
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
       {showDeleteConfirm && selectedHost && (
         <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
           <div className="bg-gray-900 border border-red-700 rounded-lg p-6 w-full max-w-md">
@@ -450,16 +441,16 @@ function Systems() {
               </div>
               <h2 className="text-xl font-bold text-red-500">Delete Host</h2>
             </div>
-            <p className="text-green-400 mb-2">
+            <p className="text-white mb-2">
               Are you sure you want to delete <span className="font-semibold text-green-300">{selectedHost.name}</span>?
             </p>
-            <p className="text-green-600 text-sm mb-6">
+            <p className="text-white text-sm mb-6">
               This action cannot be undone. The agent on the host will be disconnected.
             </p>
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setShowDeleteConfirm(false)}
-                className="px-4 py-2 text-green-500 hover:bg-green-900/30 rounded-lg transition-colors"
+                className="px-4 py-2 text-white hover:bg-green-900/30 rounded-lg transition-colors"
               >
                 Cancel
               </button>
