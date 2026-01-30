@@ -133,8 +133,6 @@ Notes:
 
 ---
 
-## One hard rule to add (optional but recommended)
-
 ```md
 > One task = one branch = one PR = delete branch = never reuse
 ```
