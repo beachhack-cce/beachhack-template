@@ -1,69 +1,131 @@
 # 🏭 Explainable Predictive Maintenance System  
-### with Decision Trace Engine & Agentic Explainability
+## Decision‑Trace–First Architecture with Maintenance Agent
 
 ---
 
 ## 📌 Project Overview
 
-Industrial environments generate massive amounts of sensor data, yet **maintenance decisions are still distrusted and delayed** due to opaque AI systems.
+Industrial machines generate massive sensor data, yet maintenance decisions are still
+- distrusted,
+- delayed,
+- and poorly explained.
 
-Most predictive maintenance solutions fail because:
-- Alerts are **black‑box**
-- Engineers cannot see **why** a decision was made
-- Predictions do not translate into **clear maintenance actions**
+Most predictive maintenance systems fail **not because predictions are wrong**, but because:
+- engineers cannot see *how* decisions were made,
+- system logic cannot be audited,
+- alerts do not translate into clear actions.
 
-This project addresses that gap by building a system that is:
-- **Explainable**
-- **Traceable**
-- **Action‑oriented**
+This project solves that problem by building a **trace‑first predictive maintenance system**
+where **every decision is recorded, explained, and acted upon**.
 
-The core idea is simple:
-
-> **Do not just predict failures — record and explain how every decision was made, and turn it into action.**
-
----
-
-## 🎯 Problem We Solve
-
-Unplanned downtime costs industries billions annually.  
-Existing solutions suffer from:
-
-- ❌ Opaque predictions  
-- ❌ Logical mismatch between expected and real behavior  
-- ❌ No clear path from alert → action  
-
-Our system focuses on **decision transparency and trust**, not just prediction accuracy.
+> **Core philosophy:**  
+> *If a system cannot show how it reasoned, it should not be trusted.*
 
 ---
 
-## 🧠 Core Idea
+## 🎯 Problem Statement
 
-At the heart of the system is a **Decision Trace Engine**.
+Existing predictive maintenance solutions suffer from:
 
-Instead of asking:
-> *“What did the model predict?”*
+- ❌ Black‑box AI alerts
+- ❌ Logical mismatch between expected and real outcomes
+- ❌ Alert fatigue due to poor explanations
+- ❌ No direct path from alert → maintenance action
 
-We answer:
-> *“How did the system reach this decision, step by step?”*
-
-Every alert is backed by a **complete reasoning trace** that can be:
-- inspected
-- explained
-- challenged
-- improved
+Our solution focuses on:
+- **decision transparency**
+- **logical correctness**
+- **human trust**
+- **workflow integration**
 
 ---
 
-## 🏗️ System Architecture (High Level)
+## 🧠 Core Idea: Decision Trace First
 
-The system is composed of **four core layers**.  
-Each layer has a clear responsibility and a single owner.
+Explainability is **not added later**.
 
-### Architecture Flow
+The system is built around a **Decision Trace Engine** that records:
+- what was evaluated,
+- which rules fired,
+- how risk evolved,
+- why the final decision occurred.
+
+Everything else (explanations, actions, learning) is built **on top of the trace**.
+
+---
+
+## 🏗️ Full Architecture Overview
+
+### Top‑Level Flow
 
 ```mermaid
 flowchart TD
-    A[Sensor & Data Reality Layer] --> B[Reasoning & Decision Trace Engine]
-    B --> C[Explainability & Agentic Layer]
-    C --> D[Action, Feedback & Learning Layer]
-    D --> B
+
+%% =========================
+%% Sensor & Data Reality Layer
+%% =========================
+subgraph L1[Sensor & Data Reality Layer]
+    S1[Sensor 1<br/>Vibration Sensor]
+    S2[Sensor 2<br/>Temperature Sensor]
+    S3[Sensor 3<br/>Load Sensor]
+
+    SD[Sensor Data Stream<br/>Time-Series Data]
+    S1 --> SD
+    S2 --> SD
+    S3 --> SD
+end
+
+%% =========================
+%% Reasoning Engine
+%% =========================
+subgraph L2[Reasoning Engine]
+    FE[Feature Extraction<br/>• Vibration trend<br/>• Temp delta<br/>• Load stability]
+    RL[Deterministic Reasoning<br/>• Rule evaluation<br/>• Threshold checks]
+
+    FE --> RL
+end
+
+%% =========================
+%% Decision Trace Engine
+%% =========================
+subgraph L3[Decision Trace Engine]
+    DT[Decision Trace Builder<br/>• Rules triggered<br/>• Intermediate risks]
+    JS[Trace Storage<br/>JSON Decision Trace]
+    FD[Final Decision<br/>Decision + Confidence]
+
+    DT --> FD
+    DT --> JS
+end
+
+%% =========================
+%% Explainability Agent
+%% =========================
+subgraph L4[Explainability & Agentic Layer]
+    TI[Trace Ingestion<br/>Reads Decision Trace]
+    LLM[Explainability Agent (LLM)<br/>Trace → Text]
+    EX[Human-Readable Explanation<br/>Why decision happened]
+
+    TI --> LLM
+    LLM --> EX
+end
+
+%% =========================
+%% Maintenance Agent & Workflow
+%% =========================
+subgraph L5[Maintenance Agent & Workflow Layer]
+    MA[Maintenance Decision Agent<br/>• Inspect<br/>• Schedule<br/>• Monitor]
+    WO[Work Order Generator<br/>Priority + Action]
+    FB[Engineer Feedback<br/>Confirm / Reject]
+end
+
+%% =========================
+%% Connections Between Layers
+%% =========================
+SD --> FE
+RL --> DT
+FD --> TI
+EX --> MA
+MA --> WO
+WO --> FB
+FB --> DT
+
