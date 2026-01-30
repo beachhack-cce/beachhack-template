@@ -1,5 +1,7 @@
 # ZeroHour
 
+📄 **Git Workflow:** [GIT_WORKFLOW.md](./GIT_WORKFLOW.md)
+
 ZeroHour is a terminal-native CLI that identifies **what breaks the business first** in a codebase.
 
 It is **not a SAST replacement**.  
@@ -66,7 +68,15 @@ ZeroHour runs **before** SAST triage to focus effort where impact is highest.
 
 ```bash
 failfast analyze
+```
+---
 
+## Contributing
+
+Before making any changes, read the Git workflow:  
+[GIT_WORKFLOW.md](./GIT_WORKFLOW.md)
+
+---
 
 ## Team
 Built during the BeachHack Hackathon.
@@ -75,4 +85,3 @@ Built during the BeachHack Hackathon.
 - **Adhil Ameen** (@aadhi13)
 - **Mathew** (@)
 - **Sangeeth** (@)
-
