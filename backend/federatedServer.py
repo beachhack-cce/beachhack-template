@@ -674,6 +674,108 @@ if FASTAPI_AVAILABLE:
             "history_length": len(node.embedding_history),
             "history": node.embedding_history
         }
+    
+    # -------------------------------------------------------------------------
+    # Self-Anomaly Detection (single-node)
+    # -------------------------------------------------------------------------
+    
+    @app.get("/nodes/{client_id}/anomaly")
+    async def get_node_anomaly(client_id: str):
+        """
+        Detect if a node is behaving anomalously compared to its own history.
+        Works with just ONE node - no need for multiple nodes.
+        """
+        node = registry.get_node(client_id)
+        if not node:
+            raise HTTPException(status_code=404, detail="Node not found")
+        
+        # Need at least 5 historical embeddings to establish baseline
+        if len(node.embedding_history) < 5:
+            return {
+                "client_id": client_id,
+                "status": "warming_up",
+                "message": f"Need at least 5 samples for baseline, have {len(node.embedding_history)}",
+                "is_anomalous": False,
+                "drift_score": 0.0
+            }
+        
+        # Current embedding
+        current = node.embedding
+        
+        # Historical embeddings (exclude the most recent one)
+        historical = [h['embedding'] for h in node.embedding_history[:-1]]
+        
+        # Compute baseline centroid from history
+        baseline_centroid = VectorMath.centroid(historical)
+        
+        # Compute distances of all historical points to centroid
+        historical_distances = [
+            VectorMath.euclidean_distance(h, baseline_centroid)
+            for h in historical
+        ]
+        
+        # Current distance from baseline
+        current_distance = VectorMath.euclidean_distance(current, baseline_centroid)
+        
+        # Compute z-score (how many std deviations from mean)
+        mean_dist = sum(historical_distances) / len(historical_distances)
+        std_dist = VectorMath.std_dev(historical_distances)
+        
+        if std_dist > 0:
+            drift_score = (current_distance - mean_dist) / std_dist
+        else:
+            drift_score = 0.0
+        
+        # Threshold for anomaly
+        ANOMALY_THRESHOLD = 2.0
+        is_anomalous = drift_score > ANOMALY_THRESHOLD
+        
+        # Compute detailed breakdown if we have weights
+        details = {}
+        if node.weights and 'feature_means' in node.weights:
+            # Compare current trend slopes to baseline
+            feature_means = node.weights.get('feature_means', {})
+            feature_vars = node.weights.get('feature_vars', {})
+            feature_counts = node.weights.get('feature_counts', {})
+            
+            for key in ['slope_memory', 'slope_cpu', 'slope_disk_latency', 
+                       'variance_cpu', 'variance_memory', 'variance_latency']:
+                if key in feature_means:
+                    mean = feature_means[key]
+                    var = feature_vars.get(key, 0)
+                    count = feature_counts.get(key, 1)
+                    std = (var / max(count - 1, 1)) ** 0.5 if count > 1 else 0
+                    details[key] = {
+                        "baseline_mean": round(mean, 4),
+                        "baseline_std": round(std, 4)
+                    }
+        
+        # Interpretation
+        if drift_score < 0.5:
+            interpretation = "Node is behaving normally"
+            status = "healthy"
+        elif drift_score < 1.5:
+            interpretation = "Slight deviation from baseline, monitoring"
+            status = "watching"
+        elif drift_score < 2.0:
+            interpretation = "Moderate deviation, worth investigating"
+            status = "warning"
+        else:
+            interpretation = "Significant anomaly detected! Behavior differs from learned baseline"
+            status = "anomalous"
+        
+        return {
+            "client_id": client_id,
+            "status": status,
+            "is_anomalous": is_anomalous,
+            "drift_score": round(drift_score, 3),
+            "threshold": ANOMALY_THRESHOLD,
+            "interpretation": interpretation,
+            "baseline_samples": len(historical),
+            "current_distance": round(current_distance, 4),
+            "baseline_mean_distance": round(mean_dist, 4),
+            "feature_details": details
+        }
 
 
 # =============================================================================
