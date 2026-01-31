@@ -19,14 +19,14 @@ const Sidebar: React.FC = () => {
           Dashboard
         </NavLink>
 
-        <NavLink
+        {/* <NavLink
           to="/payment"
           className={({ isActive }) =>
             `${styles.navItem} ${isActive ? styles.active : ""}`
           }
         >
           Payment
-        </NavLink>
+        </NavLink> */}
 
         <NavLink
           to="/audit-logs"
