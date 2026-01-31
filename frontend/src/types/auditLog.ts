@@ -17,7 +17,7 @@ export interface AuditLogApiRow {
 }
 
 export function mapAuditLogFromApi(row: AuditLogApiRow): AuditLogEntry {
-  const status: AuditLogEntry["status"] = row.status === 1 ? "Success" : "Failed";
+  const status: AuditLogEntry["status"] = row.status === 0 ? "Success" : "Failed";
   const date = new Date(row.current_time * 1000);
   const timestamp = date.toISOString().replace("T", " ").slice(0, 19);
   return {

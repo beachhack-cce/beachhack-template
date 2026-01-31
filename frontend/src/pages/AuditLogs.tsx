@@ -5,6 +5,33 @@ import { metricsGateway } from "../services/apiGateway";
 import { logsUrl } from "../services/urls";
 import styles from "./AuditLogs.module.css";
 
+function escapeCsv(val: string | number): string {
+  const s = String(val);
+  if (s.includes(",") || s.includes('"') || s.includes("\n")) {
+    return `"${s.replace(/"/g, '""')}"`;
+  }
+  return s;
+}
+
+function logsToCsv(logs: AuditLogEntry[]): string {
+  const header = "ID,Gateway,Status,Latency (ms),Timestamp";
+  const rows = logs.map((r) =>
+    [r.id, r.gateway, r.status, r.latency ?? "", r.timestamp].map(escapeCsv).join(",")
+  );
+  return [header, ...rows].join("\n");
+}
+
+function downloadCsv(logs: AuditLogEntry[]) {
+  const csv = logsToCsv(logs);
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `audit-logs-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 const AuditLogs: React.FC = () => {
   const { data: logs, isLoading, isError, error } = useQuery({
     queryKey: ["audit-logs"],
@@ -18,6 +45,15 @@ const AuditLogs: React.FC = () => {
     <div className={styles.wrapper}>
       <header className={styles.header}>
         <h1 className={styles.title}>Audit logs</h1>
+        {!isLoading && !isError && logs && logs.length > 0 && (
+          <button
+            type="button"
+            className={styles.exportBtn}
+            onClick={() => downloadCsv(logs)}
+          >
+            Export CSV
+          </button>
+        )}
       </header>
 
       {isLoading && <p className={styles.message}>Loading audit logs…</p>}

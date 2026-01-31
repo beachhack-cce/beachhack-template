@@ -4,6 +4,11 @@
 }
 
 .header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
   margin-bottom: 1.5rem;
 }
 
@@ -20,6 +25,22 @@
   color: #555;
   margin: 0;
   line-height: 1.5;
+}
+
+.exportBtn {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 2px solid #06782e;
+  background: #06782e;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.exportBtn:hover {
+  background: #056827;
 }
 
 .message,
