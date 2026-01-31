@@ -1,16 +1,17 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
+import { trpc } from "@/trpc/client";
 
 interface Host {
   id: string;
-  name: string;
-  ipAddress?: string;
-  status: "online" | "offline" | "pending";
-  lastSeen?: string;
-  os?: string;
-  registrationToken?: string;
-  createdAt?: string;
+  createdAt: string;
+  userId: string | null;
+  agentId: string | null;
+  name: string | null;
+  ipAddress: string | null;
+  status: string | null;
+  os: string | null;
 }
 
 function Systems() {
@@ -20,79 +21,35 @@ function Systems() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [addStep, setAddStep] = useState<1 | 2>(1);
   const [newHostName, setNewHostName] = useState("");
-  const [generatedToken, setGeneratedToken] = useState("");
+  const [systemId, setSystemId] = useState("");
   const [copied, setCopied] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  useEffect(() => {
-    fetchHosts();
-  }, []);
+  const { data: allHosts, isLoading, isFetched } = trpc.host.getAll.useQuery();
+  const addHostMutation = trpc.host.addHost.useMutation();
+  const deleteHostMutation = trpc.host.deleteHost.useMutation();
 
-  const fetchHosts = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch("/api/hosts");
-      if (response.ok) {
-        const data = await response.json();
-        setHosts(data);
-      }
-    } catch (error) {
-      console.error("Failed to fetch hosts:", error);
-      setHosts([
-        {
-          id: "1",
-          name: "Production Server",
-          ipAddress: "192.168.1.100",
-          status: "online",
-          lastSeen: new Date().toISOString(),
-          os: "Ubuntu 22.04",
-          createdAt: new Date(Date.now() - 86400000 * 30).toISOString(),
-        },
-        {
-          id: "2",
-          name: "Development Server",
-          ipAddress: "192.168.1.101",
-          status: "offline",
-          lastSeen: new Date(Date.now() - 3600000).toISOString(),
-          os: "CentOS 8",
-          createdAt: new Date(Date.now() - 86400000 * 15).toISOString(),
-        },
-        {
-          id: "3",
-          name: "Staging Server",
-          status: "pending",
-          createdAt: new Date().toISOString(),
-        },
-      ]);
-    } finally {
+  useEffect(() => {
+    if (isFetched && allHosts) {
+      setHosts(allHosts);
       setLoading(false);
     }
-  };
+  }, [isFetched, allHosts]);
 
-  const generateToken = () => {
-    return `tkn_${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`;
-  };
-
-  const handleNextStep = () => {
+  const handleNextStep = async () => {
     if (!newHostName.trim()) return;
-    const token = generateToken();
-    setGeneratedToken(token);
+    const host = await addHostMutation.mutateAsync({
+      systemName: newHostName,
+    });
+    setHosts([...hosts, host]);
+    setSystemId(host.id);
     setAddStep(2);
   };
 
   const handleFinishAdd = async () => {
-    const mockHost: Host = {
-      id: Date.now().toString(),
-      name: newHostName,
-      status: "pending",
-      registrationToken: generatedToken,
-      createdAt: new Date().toISOString(),
-    };
-    setHosts([...hosts, mockHost]);
-
     // Reset modal state
     setNewHostName("");
-    setGeneratedToken("");
+    setSystemId("");
     setAddStep(1);
     setShowAddModal(false);
     setCopied(false);
@@ -102,7 +59,7 @@ function Systems() {
     setShowAddModal(false);
     setAddStep(1);
     setNewHostName("");
-    setGeneratedToken("");
+    setSystemId("");
     setCopied(false);
   };
 
@@ -110,13 +67,8 @@ function Systems() {
     if (!selectedHost) return;
 
     try {
-      const response = await fetch(`/api/hosts/${selectedHost.id}`, {
-        method: "DELETE",
-      });
-
-      if (response.ok) {
-        setHosts(hosts.filter((h) => h.id !== selectedHost.id));
-      }
+      await deleteHostMutation.mutateAsync({ systemId: selectedHost.id });
+      setHosts(hosts.filter((h) => h.id !== selectedHost.id));
     } catch (error) {
       console.error("Failed to delete host:", error);
       setHosts(hosts.filter((h) => h.id !== selectedHost.id));
@@ -127,8 +79,7 @@ function Systems() {
   };
 
   const getCurlCommand = () => {
-    const serverUrl = typeof window !== "undefined" ? window.location.origin : "https://your-server.com";
-    return `curl -sSL ${serverUrl}/api/agent/install | sudo bash -s -- --token "${generatedToken}" --name "${newHostName}"`;
+    return `curl -fsSL "https://raw.githubusercontent.com/aibelbin/paper/main/client-toolkit/install.sh" | sudo API_ENDPOINT="https://143.110.250.168:8000/api/metrics" SYSTEM_ID="${systemId}" MONITOR_INTERVAL="10" REQUEST_TIMEOUT="30" FEDERATED_COLLECTION_INTERVAL="10" FEDERATED_WINDOW_MINUTES="15" FEDERATED_AGGREGATOR_ENDPOINT="http://143.110.250.168:8080/federated/update" FEDERATED_UPDATE_INTERVAL="60" bash`
   };
 
   const copyToClipboard = async () => {
@@ -221,7 +172,7 @@ function Systems() {
                 <h3 className="font-semibold text-lg text-white">{host.name}</h3>
                 <span
                   className={`w-3 h-3 rounded-full ${getStatusColor(host.status)}`}
-                  title={host.status}
+                  title={host.status as string}
                 ></span>
               </div>
               {host.ipAddress && (
@@ -373,14 +324,14 @@ function Systems() {
                 <span className="text-white">Date Added</span>
                 <span className="text-white">{formatDate(selectedHost.createdAt)}</span>
               </div>
-              {selectedHost.lastSeen && (
+              {/* {selectedHost.lastSeen && (
                 <div className="flex justify-between py-2 border-b border-green-900">
                   <span className="text-white">Last Seen</span>
                   <span className="text-white">
                     {new Date(selectedHost.lastSeen).toLocaleString()}
                   </span>
                 </div>
-              )}
+              )} */}
               {selectedHost.status === "pending" && (
                 <div className="mt-4 p-3 bg-yellow-900/20 border border-yellow-700 rounded-lg">
                   <p className="text-yellow-500 text-sm">

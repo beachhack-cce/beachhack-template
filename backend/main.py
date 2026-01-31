@@ -50,10 +50,10 @@ app.add_middleware(
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
-# if not SUPABASE_URL or not SUPABASE_KEY:
-#     raise ValueError("SUPABASE_URL and SUPABASE_KEY environment variables are required")
+if not SUPABASE_URL or not SUPABASE_KEY:
+    raise ValueError("SUPABASE_URL and SUPABASE_KEY environment variables are required")
 
-# supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 wazuh = WazuhSDK(
     host="143.110.250.168",
@@ -656,6 +656,24 @@ async def generate_report(request: ReportRequest):
         print(f"Error generating report: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to generate report: {str(e)}")
 
+@app.get("/host/add")
+async def add_host(system_id: str, ip_address: str):
+    try:
+        data = {
+            "status": "online",
+            "ip_address": ip_address,
+        }
+        result = supabase.table("systems").update(data).eq("id", system_id).execute()
+        if not result.data:
+            raise HTTPException(status_code=404, detail="System not found")
+            
+        return {"status": "success", "system_id": system_id}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error adding host: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to add host: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn

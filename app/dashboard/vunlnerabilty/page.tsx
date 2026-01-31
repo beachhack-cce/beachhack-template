@@ -141,7 +141,7 @@ export default function VulnerabilityPage() {
   });
 
   const severityCounts = vulnerabilities?.reduce(
-    (acc:any, vuln: any) => {
+    (acc: any, vuln: any) => {
       const sev = vuln.severity.toLowerCase();
       acc[sev] = (acc[sev] || 0) + 1;
       return acc;
