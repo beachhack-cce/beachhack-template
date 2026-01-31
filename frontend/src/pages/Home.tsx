@@ -9,6 +9,8 @@ const Home: React.FC = () => {
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["servers", "metrics"],
     queryFn: fetchServers,
+    refetchInterval: 3000,
+    refetchIntervalInBackground: true,
   });
 
   const providers: Provider[] = data?.servers?.map(serverToProvider) ?? [];
