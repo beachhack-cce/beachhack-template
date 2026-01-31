@@ -87,9 +87,9 @@ zerohour analyze
 ---
 
 ## Documentation
-- 📄 **Git Workflow:** [GIT_WORKFLOW.md](./GIT_WORKFLOW.md "Git Workflow markdown")
-- 📄 **Execution Plan:** [EXECUTION_PLAN.md](./EXECUTION_PLAN.md "Execution Plan markdown")
-- 📄 **How it works (detail):** [docs/HOW_IT_WORKS.md](./docs/HOW_IT_WORKS.md "Detailed Documentation")
+- 📄 **Git Workflow:** [GIT_WORKFLOW.md](./GIT_WORKFLOW.md "Git Workflow documentation")
+- 📄 **Architecture:** [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md "Architecture documentation")
+- 📄 **Analysis Logic:** [docs/ANALYSIS_LOGIC.md](./docs/ANALYSIS_LOGIC.md "Analysis Logic documentation")
 
 ---
 
