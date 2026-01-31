@@ -24,7 +24,11 @@ export function printWelcome() {
   console.log(chalk.dim('─'.repeat(60)) + '\n');
 }
 
-export function displayResults(result: AnalysisResult) {
+export function displayResults(result: AnalysisResult, projectName?: string) {
+  if (projectName) {
+    console.log(chalk.bold.magenta(`\n📂 PROJECT: ${projectName}`));
+  }
+
   if (result.isFallback) {
     console.log(chalk.yellow('⚠️  AI API unavailable or failed. Showing deterministic results.\n'));
   }
