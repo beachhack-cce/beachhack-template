@@ -1,49 +1,161 @@
-# BeachHack Template Repository
+# ZeroHour
 
-![BeachHack Banner](https://github.com/user-attachments/assets/b46c3336-f9eb-473a-ba76-bcf5c0f29d0d)
+ZeroHour is a terminal-native CLI that answers one question:
 
-Official starter template repository for **BeachHack** hackathon participants.
+> **What breaks the business first if this code fails?**
 
----
-
-## 📌 Instructions
-
-All teams must **fork this repository** at the start of the hackathon and use the forked repository for all development work. Use of personal or pre-existing repositories is not allowed.
-
-You are **not restricted to the track or domain** you submitted your initial idea under. Teams are free to choose **any of the released problem statements**.
+It is **not a SAST replacement**.  
+It is the **decision layer before SAST**.
 
 ---
 
-## ⏱️ Important Rules
-
-- All development must begin **after forking** this repository.
-- The problem statements were shared in advance **only for ideation and planning**.
-- **No pre-built or pre-developed solutions** are allowed in any form.
-- Commit history and repository metadata will be actively reviewed.
-- Any violation of these rules may result in **immediate disqualification**.
+🌐 **ZeroHour website:**  
+https://samurai-beachhack.github.io/zerohour
 
 ---
 
-## 🛠️ Project Setup
+## What Problem It Solves
 
-This repository does **not enforce any folder structure or technology stack**.  
-Teams are free to organize their project and choose tools, frameworks, and platforms as required by their solution.
+Modern SAST tools:
+- Generate hundreds of findings
+- Treat all issues as equal
+- Lack business or failure impact context
 
----
-
-## 📤 Submission Guidelines
-
-Your forked repository will be considered your final submission.  
-Ensure your repository includes a clear README describing:
-- Selected problem statement
-- Project overview
-- Technical approach
-- Setup instructions
-- Demo links
-- Screenshots
+Teams know *what is wrong*  
+They do **not know what to fix first**
 
 ---
 
-Good luck, and happy hacking 🚀  
-**– Team BeachHack**
+## What ZeroHour Does
+
+ZeroHour analyzes a codebase and outputs:
+
+- **Only the top 10 issues**
+- Ranked by **failure impact**
+- Explained in **business consequences**
+
+It focuses on:
+- Failure-prone areas
+- Single-point-of-failure logic
+- Risk concentration, not volume
+
+---
+
+
+## Core Principles
+
+- Failure-first, not vulnerability-first
+- Forced prioritization (Top 10 only)
+- Business impact over technical noise
+- Deterministic and auditable logic
+- Terminal-only workflow
+
+---
+
+## How It Fits With SAST
+
+**SAST tools**
+- Find what is wrong
+
+**ZeroHour**
+- Decides what matters first
+
+Recommended flow:
+ZeroHour → Decide priorities → SAST → Fix
+
+---
+
+## Usage
+
+After building the project:
+
+```bash
+# Analyze current directory
+./zerohour analyze
+
+# Analyze a specific directory
+./zerohour analyze -C examples/sample-app
+
+# Plain output (no box UI)
+./zerohour analyze --no-box
+
+Optional ways to run:
+npm run analyze
+npm run analyze -- -C examples/sample-app
+npx zerohour analyze
+npm link && zerohour analyze
+To run from anywhere:
+export PATH="/path/to/zerohour:$PATH"
+zerohour analyze
+```
+
+---
+
+## Documentation
+
+Start here:
+- 📘 **Overview** — what ZeroHour is and why it exists  
+  [docs/overview.md](./docs/overview.md "Project overview and core idea")
+
+Getting started:
+- ⚙️ **Installation** — setup and build instructions  
+  [docs/installation.md](./docs/installation.md "Installation guide")
+- ▶️ **Usage** — how to run the CLI and interpret output  
+  [docs/usage.md](./docs/usage.md "CLI usage guide")
+- ❓ **FAQ** — common questions and clarifications  
+  [docs/faq.md](./docs/faq.md "Frequently asked questions")
+
+How it works:
+- 🧱 **Architecture** — system structure and data flow  
+  [docs/architecture.md](./docs/architecture.md "System architecture")
+- 🧠 **Analysis Logic** — how failure impact is determined  
+  [docs/analysis_logic.md](./docs/analysis_logic.md "Failure analysis logic")
+
+Reference:
+- 📖 **Glossary** — project-specific terminology  
+  [docs/glossary.md](./docs/glossary.md "Terminology reference")
+- ⚠️ **Limitations** — explicit and intentional constraints  
+  [docs/limitations.md](./docs/limitations.md "Known limitations")
+
+Project & contribution:
+- 🗺️ **Roadmap** — current scope and next steps  
+  [docs/roadmap.md](./docs/roadmap.md "Project roadmap")
+- 🧭 **Execution Plan** — development phases and priorities  
+  [docs/execution_plan.md](./docs/execution_plan.md "Execution plan")
+- 🔀 **Git Workflow** — contribution process and rules  
+  [docs/git_workflow.md](./docs/git_workflow.md "Git workflow")
+- 🧑‍💻 **Contributing** — how to contribute  
+  [docs/contributing.md](./docs/contributing.md "Contribution guidelines")
+
+📂 Full documentation index:  
+[docs/index.md](./docs/index.md "Complete documentation index")
+
+---
+
+## Contributing
+
+Before making any changes, read the Git workflow:  
+[git_workflow.md](./git_workflow.md "Detailed Git Workflow docs")
+
+---
+
+## Project Status
+
+Prototype built during a hackathon.
+Logic and scope may evolve.
+
+---
+
+## Contributors
+Built during the [BeachHack](https://beachhack.in "Beach Hack hackthon website") Hackathon.
+
+<p align="center">
+  <a href="https://github.com/Samurai-beachhack/zerohour/graphs/contributors">
+    <img
+      src="https://contrib.rocks/image?repo=Samurai-beachhack/zerohour&size=80&columns=10&bg=transparent"
+      alt="Contributors"
+    />
+  </a>
+</p>
+
 

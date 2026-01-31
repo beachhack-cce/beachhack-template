@@ -1,0 +1,33 @@
+{
+  "name": "zerohour-trae",
+  "displayName": "ZeroHour for Trae AI",
+  "description": "Native AI-powered SAST prioritization and remediation for Trae AI",
+  "version": "1.0.0",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Security",
+    "AI"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension/src/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "zerohour.analyze",
+        "title": "ZeroHour: Analyze Risks"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.80.0",
+    "@types/node": "^18.0.0",
+    "typescript": "^5.0.0"
+  }
+}
