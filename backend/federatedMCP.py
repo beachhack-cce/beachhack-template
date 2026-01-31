@@ -236,9 +236,9 @@ how the node's behavior has evolved over time.""",
             drift = result.get("drift_score", 0)
             interpretation = result.get("interpretation", "")
             
-            emoji = {"healthy": "✅", "watching": "👀", "warning": "⚠️", "anomalous": "🚨", "warming_up": "🔄"}.get(status, "❓")
+            status_label = {"healthy": "[OK]", "watching": "[WATCH]", "warning": "[WARN]", "anomalous": "[ALERT]", "warming_up": "[WARMING UP]"}.get(status, "[?]")
             
-            response = f"""{emoji} **Node Health Report**
+            response = f"""{status_label} **Node Health Report**
 
 **Status:** {status.upper()}
 **Drift Score:** {drift} (threshold: 2.0)
@@ -251,7 +251,7 @@ how the node's behavior has evolved over time.""",
 """
             
             if result.get("message"):
-                response = f"🔄 {result['message']}"
+                response = f"[WARMING UP] {result['message']}"
             
             return [TextContent(type="text", text=response)]
         
@@ -264,10 +264,10 @@ how the node's behavior has evolved over time.""",
             if not result:
                 return [TextContent(type="text", text="No nodes registered yet.")]
             
-            response = f"**📊 Registered Nodes ({len(result)})**\n\n"
+            response = f"**Registered Nodes ({len(result)})**\n\n"
             
             for node in result:
-                stale_icon = "⚪" if node.get("is_stale") else "🟢"
+                stale_icon = "[STALE]" if node.get("is_stale") else "[ACTIVE]"
                 response += f"{stale_icon} **{node['client_id'][:16]}**\n"
                 response += f"   - Samples: {node.get('num_samples', 0)}\n"
                 response += f"   - Updates: {node.get('update_count', 0)}\n"
@@ -294,7 +294,7 @@ how the node's behavior has evolved over time.""",
             bar_filled = int(sim * 10)
             bar = "█" * bar_filled + "░" * (10 - bar_filled)
             
-            response = f"""**🔄 Node Comparison**
+            response = f"""**Node Comparison**
 
 **{node_a[:12]}** vs **{node_b[:12]}**
 
@@ -317,9 +317,9 @@ Similarity: [{bar}] {sim:.1%}
             stale = result.get("stale_nodes", 0)
             outliers = result.get("outlier_count", 0)
             
-            health = "🟢 Healthy" if outliers == 0 else f"🟡 {outliers} outlier(s) detected"
+            health = "Healthy" if outliers == 0 else f"{outliers} outlier(s) detected"
             
-            response = f"""**🌐 Cluster Status**
+            response = f"""**Cluster Status**
 
 **Overall Health:** {health}
 
@@ -342,12 +342,12 @@ Similarity: [{bar}] {sim:.1%}
                 return [TextContent(type="text", text=f"Error: {result['error']}")]
             
             if not result:
-                return [TextContent(type="text", text="✅ No outliers detected. All nodes are behaving normally.")]
+                return [TextContent(type="text", text="No outliers detected. All nodes are behaving normally.")]
             
-            response = f"**🚨 Outliers Detected ({len(result)})**\n\n"
+            response = f"**Outliers Detected ({len(result)})**\n\n"
             
             for outlier in result:
-                response += f"⚠️ **{outlier['client_id'][:16]}**\n"
+                response += f"[ALERT] **{outlier['client_id'][:16]}**\n"
                 response += f"   - Outlier Score: {outlier.get('outlier_score', 0):.2f}\n"
                 response += f"   - Distance from centroid: {outlier.get('distance_from_centroid', 0):.4f}\n\n"
             
@@ -365,7 +365,7 @@ Similarity: [{bar}] {sim:.1%}
             
             history = result.get("history", [])
             
-            response = f"**📈 Node History: {client_id[:16]}**\n\n"
+            response = f"**Node History: {client_id[:16]}**\n\n"
             response += f"Total samples: {len(history)}\n\n"
             
             # Show last 5 entries
