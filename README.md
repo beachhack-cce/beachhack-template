@@ -2,6 +2,7 @@
 
 - 📄 **Git Workflow:** [GIT_WORKFLOW.md](./GIT_WORKFLOW.md)
 - 📄 **Execution Plan:** [EXECUTION_PLAN.md](./EXECUTION_PLAN.md)
+- 📄 **How it works (detail):** [docs/HOW_IT_WORKS.md](./docs/HOW_IT_WORKS.md)
 
 ZeroHour is a terminal-native CLI that identifies **what breaks the business first** in a codebase.
 

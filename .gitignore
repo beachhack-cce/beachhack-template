@@ -13,6 +13,9 @@ yarn-error.log*
 dist/
 build/
 
+# ZeroHour last-run snapshot (delta risk)
+.zerohour-last.json
+
 # Vite
 .vite/
 

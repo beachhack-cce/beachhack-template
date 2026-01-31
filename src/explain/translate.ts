@@ -84,6 +84,92 @@ export function fixNowBullets(f: DetectedFailure): string[] {
   return fixes[f.ruleId] ?? ['Review this code path and add validation, error handling, or guards as appropriate.'];
 }
 
+/** Risk Story Mode: 3-step "how this failure becomes an incident" */
+export function riskStorySteps(f: DetectedFailure): [string, string, string] {
+  const stories: Record<string, [string, string, string]> = {
+    A1: ['Invalid or malicious input hits the API with no validation.', 'Request reaches business logic; bad data triggers a crash or corrupts state.', 'Service fails or data is corrupted; users or downstream systems are affected.'],
+    A2: ['Client-side checks are bypassed (e.g. devtools, direct API call).', 'Backend trusts the request; malformed or forged data enters the system.', 'Business logic or data integrity breaks; revenue or policy is violated.'],
+    A3: ['User supplies a number that overflows, is NaN, or negative.', 'Arithmetic runs without bounds; result is wrong or throws.', 'Wrong totals, quotas, or pricing; financial or operational incident.'],
+    A4: ['A large offset or unbounded list is requested.', 'Query or loop runs without limit; memory or CPU spikes.', 'Service degrades or OOMs; availability incident.'],
+    A5: ['An exception is thrown in the try block.', 'Catch block is empty; error is swallowed and execution continues.', 'Process runs in invalid state; data or behavior is wrong; hard to debug.'],
+    A6: ['User or attacker bypasses frontend (e.g. calls API, edits client).', 'Server has no equivalent rule; request is accepted.', 'Wrong price, eligibility, or access; revenue or compliance incident.'],
+    A7: ['Feature flag is toggled only on the client.', 'Server does not enforce; sensitive feature can be enabled client-side.', 'Inconsistent or insecure behavior in production.'],
+    B1: ['Request is sent to a protected route without auth.', 'No middleware checks identity; handler runs for anyone.', 'Data or actions are exposed; confidentiality or integrity incident.'],
+    B2: ['Secrets are read from code or config (repo, build, or runtime).', 'Credentials are exposed via version control, logs, or build artifacts.', 'Account or system compromise; abuse of third-party services.'],
+    B3: ['Non-admin or non-owner calls admin/payment endpoint.', 'No authorization check; request is processed.', 'Privilege escalation or unauthorized payment; compliance incident.'],
+    B4: ['Repeated requests hit an expensive endpoint.', 'No rate limit; CPU, memory, or downstream is exhausted.', 'Service becomes unavailable; DoS incident.'],
+    B5: ['Malicious or oversized file is uploaded.', 'No type/size validation; file is stored or processed.', 'Storage abuse, code execution, or crash; security or availability incident.'],
+    B6: ['User changes resource ID in the request (e.g. /users/123 → 456).', 'Server returns or updates by ID without ownership check.', 'Another user’s data is read or modified (IDOR); compliance incident.'],
+    C1: ['An awaited call rejects (e.g. DB, API).', 'No try/catch; rejection propagates as unhandled.', 'Process may crash or leave state inconsistent; availability incident.'],
+    C2: ['A promise rejects (e.g. network failure).', 'No .catch(); unhandledRejection is emitted.', 'Node may exit; availability incident.'],
+    C3: ['Remote service hangs or is very slow.', 'Request has no timeout; connection or event loop blocks.', 'Thread pool or connections exhausted; cascade failure.'],
+    C4: ['Dependency is down; retries keep firing.', 'No circuit breaker; every request retries and adds load.', 'Cascade failure; dependent service is overwhelmed.'],
+    C5: ['An error is thrown in a request handler.', 'No global error handler; Express/Node crashes or leaks stack.', 'Server restarts or stack trace is exposed; availability or security.'],
+    C6: ['A promise rejects and no handler runs.', 'unhandledRejection is emitted.', 'Process may terminate; availability incident.'],
+    D1: ['First write succeeds; second write fails.', 'No transaction; partial state is committed.', 'Database is inconsistent; business logic or reports are wrong.'],
+    D2: ['Update runs; mid-way an error occurs.', 'No rollback or transaction; state is partially updated.', 'Data inconsistency; wrong balances or counts.'],
+    D3: ['A DB write fails (constraint, connection, etc.).', 'Error is not caught; caller does not handle.', 'Half-updated state or crash; integrity or availability.'],
+    D4: ['Duplicate value is inserted for a “unique” field.', 'No unique constraint; duplicate is stored.', 'Integrity and business logic break; duplicates in reports.'],
+    D5: ['Two requests read–modify–write the same counter/balance.', 'No lock or transaction; one update overwrites the other.', 'Lost update; wrong total or balance; financial error.'],
+    E1: ['API call fails (network, 5xx).', 'No error UI; loading state never clears.', 'User sees infinite loader; support burden and perceived outage.'],
+    E2: ['Request fails; no .catch() or error UI.', 'User sees no feedback.', 'Confusion and support tickets; perceived broken feature.'],
+    E3: ['Optimistic update is shown; server then rejects.', 'No rollback; UI stays “success”.', 'User believes action succeeded; data is inconsistent.'],
+    E4: ['User double-clicks submit.', 'Two requests are sent; no disable or debounce.', 'Duplicate order or charge; revenue or data incident.'],
+    E5: ['API returns 4xx/5xx.', 'Client does not check status; treats body as success.', 'Wrong data shown or wrong flow; user or business error.'],
+    F1: ['Service listens on 0.0.0.0.', 'Process is reachable from the network.', 'Larger attack surface; unintended exposure.'],
+    F2: ['Debug or dev mode is enabled in production.', 'Verbose logs or dev tools are active.', 'Info leak or performance degradation.'],
+    F3: ['Cookies or data sent over HTTP.', 'Traffic is not encrypted.', 'Session or data intercepted; confidentiality incident.'],
+    F4: ['Same config used in all environments.', 'Prod may get dev secrets or behavior.', 'Wrong config in prod; security or correctness.'],
+    F5: ['Secrets are committed to the repo.', 'Code is pushed or forked.', 'Credentials exposed; compromise.'],
+  };
+  return stories[f.ruleId] ?? [
+    'A precondition or invariant is violated.',
+    'The failure propagates through the system.',
+    'Business impact: availability, integrity, or confidentiality is affected.',
+  ];
+}
+
+/** Blast Radius: text-based visualization of what is affected */
+export function blastRadiusText(f: DetectedFailure): string {
+  const radii: Record<string, string> = {
+    A1: 'API layer → business logic → data/service',
+    A2: 'Client → API → backend state',
+    A3: 'User input → calculation path → totals/quotas',
+    A4: 'API/query → memory/CPU → entire process',
+    A5: 'Failing code path → silent continue → process state',
+    A6: 'Frontend → API (bypassed) → revenue/policy',
+    A7: 'Client feature flag → server (no check) → behavior',
+    B1: 'Public network → route handler → all users’ data',
+    B2: 'Repo/build/runtime → credentials → all linked services',
+    B3: 'Caller → admin/payment route → privileges or money',
+    B4: 'Attacker/load → expensive endpoint → CPU/memory/downstream',
+    B5: 'Upload → storage/processing → server or storage',
+    B6: 'Request (any user) → resource by ID → any user’s data',
+    C1: 'Async call → unhandled rejection → process',
+    C2: 'Promise → unhandledRejection → process',
+    C3: 'Network call → hang → connections/event loop',
+    C4: 'Dependency → retries → dependent service',
+    C5: 'Request handler → uncaught error → server response',
+    C6: 'Promise → no handler → process',
+    D1: 'Multi-step write → partial commit → database',
+    D2: 'Update → partial apply → table/row',
+    D3: 'Write → unhandled error → DB/process',
+    D4: 'Insert → no constraint → table integrity',
+    D5: 'Concurrent writes → race → counter/balance',
+    E1: 'API failure → loading state → all users of that UI',
+    E2: 'Request failure → no UI → user session',
+    E3: 'Server reject → optimistic UI → user view',
+    E4: 'Double submit → two requests → order/payment',
+    E5: '4xx/5xx → client ignores → user flow',
+    F1: 'Process → 0.0.0.0 → network',
+    F2: 'Config → debug flag → logs/behavior',
+    F3: 'Client → HTTP → cookies/data',
+    F4: 'Config file → env → all environments',
+    F5: 'Repo → push/fork → credentials',
+  };
+  return radii[f.ruleId] ?? 'Code path → failure → system impact';
+}
+
 export function failureTitle(f: DetectedFailure): string {
   const titles: Record<string, string> = {
     A1: 'Missing input validation on public API',
