@@ -1,9 +1,9 @@
 {
   "recommended_action": [
-    "Address EARLY_BEARING_DEGRADATION: Check lubrication levels immediately.",
-    "Schedule bearing replacement within 5\u201310 days if symptoms persist.",
-    "Monitor rapid temperature spike and vibration trends closely."
+    "Condition: High vibration instability indicating bearing damage, rotor imbalance, or internal mechanical faults. Actions: Inspect bearings and rotor alignment; verify foundation stability; reduce operating speed if possible; schedule corrective maintenance.",
+    "Condition: Sustained compressor overload indicating excessive demand, downstream restriction, or control system mismatch. Actions: Inspect discharge line restrictions; verify control settings; reduce operating load; schedule system inspection.",
+    "Condition: Sudden vibration spikes indicating foreign object intrusion, belt impact events, or roller seizure. Actions: Inspect conveyor path immediately; remove obstructions if present; inspect rollers for seizure; resume operation only after clearance."
   ],
-  "safety_note": "Before inspecting equipment, ensure power is isolated and lock-out/tag-out procedures are followed.",
+  "safety_note": "Verified from internal knowledge base.",
   "reference": "Internal Knowledge Base"
 }

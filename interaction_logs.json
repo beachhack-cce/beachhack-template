@@ -1,16 +1,96 @@
 [
     {
-        "timestamp": "2026-01-31T15:32:23.479601",
+        "timestamp": "2026-01-31T23:58:27.914545",
         "input_trace": {
             "recommended_action": [
-                "Address EARLY_BEARING_DEGRADATION: Check lubrication levels immediately.",
-                "Schedule bearing replacement within 5\u201310 days if symptoms persist.",
-                "Monitor rapid temperature spike and vibration trends closely."
+                "fallback"
             ],
-            "safety_note": "Before inspecting equipment, ensure power is isolated and lock-out/tag-out procedures are followed.",
+            "safety_note": "Standard safety protocols apply.",
+            "reference": "None"
+        },
+        "output_explanation": "The fallback is to use a standard safety protocol. The timeframe is 3 days. The safety note is: Standard safety protocols apply. The reference is: None. The recommended action is: Fallback. The timeframe is 3 days. The safety note is: Standard safety protocols apply. The reference is: None.",
+        "user_feedback": "Accepted"
+    },
+    {
+        "timestamp": "2026-02-01T00:34:15.954559",
+        "input_trace": {
+            "recommended_action": [
+                "fallback"
+            ],
+            "safety_note": "Standard safety protocols apply.",
+            "reference": "None"
+        },
+        "output_explanation": "Connect the points fluently. - Recommendations: - Follow the guidelines for a safe and sound environment. - Follow the guidelines for a safe and sound environment. - Follow the guidelines for a safe and sound environment. - Follow the guidelines for a safe and sound environment. - Follow the guidelines for a safe and sound environment. - Follow the guidelines for a safe and sound environment. - Follow the guidelines for a safe and sound environment. - Follow the guidelines for a safe and sound environment. - Follow the guidelines for a safe and sound environment. - Follow the guidelines for a safe and sound environment. - Follow the guidelines for a safe and sound environment. - Follow the guidelines for a safe and sound environment. - Follow the guidelines for a safe and sound environment. - Follow the guidelines for a safe and sound environment. - Follow the guidelines for a safe and sound environment. - Follow the guidelines for a safe and sound environment. - Follow the guidelines for a safe and sound environment. - Follow the guidelines for a safe and sound environment. - Follow the guidelines for a safe and sound environment. - Follow the guidelines for a safe and sound environment. - Follow the guidelines for a safe and sound environment. - Follow the guidelines for a safe and sound",
+        "user_feedback": "Rejected"
+    },
+    {
+        "timestamp": "2026-02-01T00:50:11.014655",
+        "input_trace": {
+            "recommended_action": [
+                "Condition: High vibration instability indicating bearing damage, rotor imbalance, or internal mechanical faults. Actions: Inspect bearings and rotor alignment; verify foundation stability; reduce operating speed if possible; schedule corrective maintenance.",
+                "Condition: Sustained compressor overload indicating excessive demand, downstream restriction, or control system mismatch. Actions: Inspect discharge line restrictions; verify control settings; reduce operating load; schedule system inspection.",
+                "Condition: Sudden vibration spikes indicating foreign object intrusion, belt impact events, or roller seizure. Actions: Inspect conveyor path immediately; remove obstructions if present; inspect rollers for seizure; resume operation only after clearance."
+            ],
+            "safety_note": "Verified from internal knowledge base.",
             "reference": "Internal Knowledge Base"
         },
-        "output_explanation": "If you suspect the bearings are leaking, address the problem immediately. If the bearings are leaking, check lubrication levels immediately. If the bearings are leaking, schedule replacement within 5\u201310 days if symptoms persist. If the bearings are leaking, check power and lock-out/tag-out procedures.",
-        "user_feedback": "Accepted"
+        "output_explanation": "Check the conveyor path. Check for vibrations.",
+        "user_feedback": "Rejected"
+    },
+    {
+        "timestamp": "2026-02-01T00:50:41.724232",
+        "input_trace": {
+            "recommended_action": [
+                "Condition: High vibration instability indicating bearing damage, rotor imbalance, or internal mechanical faults. Actions: Inspect bearings and rotor alignment; verify foundation stability; reduce operating speed if possible; schedule corrective maintenance.",
+                "Condition: Sustained compressor overload indicating excessive demand, downstream restriction, or control system mismatch. Actions: Inspect discharge line restrictions; verify control settings; reduce operating load; schedule system inspection.",
+                "Condition: Sudden vibration spikes indicating foreign object intrusion, belt impact events, or roller seizure. Actions: Inspect conveyor path immediately; remove obstructions if present; inspect rollers for seizure; resume operation only after clearance."
+            ],
+            "safety_note": "Verified from internal knowledge base.",
+            "reference": "Internal Knowledge Base"
+        },
+        "output_explanation": "Perform maintenance on conveyors. Check the belt and rollers for vibration spikes.",
+        "user_feedback": "Rejected"
+    },
+    {
+        "timestamp": "2026-02-01T00:51:10.083292",
+        "input_trace": {
+            "recommended_action": [
+                "Condition: High vibration instability indicating bearing damage, rotor imbalance, or internal mechanical faults. Actions: Inspect bearings and rotor alignment; verify foundation stability; reduce operating speed if possible; schedule corrective maintenance.",
+                "Condition: Sustained compressor overload indicating excessive demand, downstream restriction, or control system mismatch. Actions: Inspect discharge line restrictions; verify control settings; reduce operating load; schedule system inspection.",
+                "Condition: Sudden vibration spikes indicating foreign object intrusion, belt impact events, or roller seizure. Actions: Inspect conveyor path immediately; remove obstructions if present; inspect rollers for seizure; resume operation only after clearance."
+            ],
+            "safety_note": "Verified from internal knowledge base.",
+            "reference": "Internal Knowledge Base"
+        },
+        "output_explanation": "Perform maintenance of conveyors. Check the belt alignment and control system.",
+        "user_feedback": "Rejected"
+    },
+    {
+        "timestamp": "2026-02-01T00:54:03.802509",
+        "input_trace": {
+            "recommended_action": [
+                "Condition: High vibration instability indicating bearing damage, rotor imbalance, or internal mechanical faults. Actions: Inspect bearings and rotor alignment; verify foundation stability; reduce operating speed if possible; schedule corrective maintenance.",
+                "Condition: Sustained compressor overload indicating excessive demand, downstream restriction, or control system mismatch. Actions: Inspect discharge line restrictions; verify control settings; reduce operating load; schedule system inspection.",
+                "Condition: Sudden vibration spikes indicating foreign object intrusion, belt impact events, or roller seizure. Actions: Inspect conveyor path immediately; remove obstructions if present; inspect rollers for seizure; resume operation only after clearance."
+            ],
+            "safety_note": "Verified from internal knowledge base.",
+            "reference": "Internal Knowledge Base"
+        },
+        "output_explanation": "Perform maintenance of the conveyor. Check for vibrations.",
+        "user_feedback": "Rejected"
+    },
+    {
+        "timestamp": "2026-02-01T01:02:44.238016",
+        "input_trace": {
+            "recommended_action": [
+                "Condition: High vibration instability indicating bearing damage, rotor imbalance, or internal mechanical faults. Actions: Inspect bearings and rotor alignment; verify foundation stability; reduce operating speed if possible; schedule corrective maintenance.",
+                "Condition: Sustained compressor overload indicating excessive demand, downstream restriction, or control system mismatch. Actions: Inspect discharge line restrictions; verify control settings; reduce operating load; schedule system inspection.",
+                "Condition: Sudden vibration spikes indicating foreign object intrusion, belt impact events, or roller seizure. Actions: Inspect conveyor path immediately; remove obstructions if present; inspect rollers for seizure; resume operation only after clearance."
+            ],
+            "safety_note": "Verified from internal knowledge base.",
+            "reference": "Internal Knowledge Base"
+        },
+        "output_explanation": "The following are the steps to prevent vibrations from forming in your conveyor system.",
+        "user_feedback": "Rejected"
     }
-] 
+]

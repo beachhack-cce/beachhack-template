@@ -5,14 +5,19 @@ import torch
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
 # Constants
-MODEL_NAME = "google/flan-t5-large"
+MODEL_NAME = "google/flan-t5-small"
 LOG_FILE = "interaction_logs.json"
+input_file = "final_recommendation.json"
 
 class MachineExplainer:
     def __init__(self, model_name=MODEL_NAME):
         print(f"Loading model: {model_name}...")
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-        self.model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
+        try:
+            self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+            self.model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
+        except Exception as e:
+            print(f"FAILED TO LOAD MODEL: {e}")
+            raise e
         
         # Use GPU if available
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -57,37 +62,80 @@ class MachineExplainer:
             "observations": observations
         }
 
-    def generate_explanation(self, decision_trace):
-        human_trace = self._humanize_decision_trace(decision_trace)
+    def update_knowledge_base(self, decision_trace, explanation):
+        """
+        Appends the accepted explanation to the local knowledge base.
+        """
+        kb_path = os.path.join("knowledge_base", "knowledgebase.json")
         
-        data_text = "\n".join([f"- {obs}" for obs in human_trace['observations']])
+        # Load existing KB
+        try:
+            with open(kb_path, 'r') as f:
+                kb_data = json.load(f)
+                if not isinstance(kb_data, list):
+                    kb_data = []
+        except (FileNotFoundError, json.JSONDecodeError):
+            kb_data = []
+            
+        # Create new chunk
+        new_id = f"chunk_{int(datetime.datetime.now().timestamp())}"
+        
+        # Extract metadata from input trace if available
+        input_trace = decision_trace.get("input_trace", {})
+        decision = input_trace.get("decision", "USER_FEEDBACK")
+        
+        new_chunk = {
+            "id": new_id,
+            "text": explanation,
+            "metadata": {
+                "failure_type": decision,
+                "section": "User_Verified",
+                "timestamp": datetime.datetime.now().isoformat()
+            }
+        }
+        
+        kb_data.append(new_chunk)
+        
+        # Save back to file
+        with open(kb_path, 'w') as f:
+            json.dump(kb_data, f, indent=4)
+            
+        print(f"\n[INFO] Knowledge Base updated with new chunk: {new_id}")
+
+    def generate_explanation(self, decision_trace):
+        # Extract recommendations specifically from the final_recommendation.json structure
+        recommendations = decision_trace.get("recommended_action", [])
+        if isinstance(recommendations, list):
+            rec_text = "\n".join(rec for rec in recommendations if isinstance(rec, str))
+        else:
+            rec_text = str(recommendations)
 
         prompt = f"""
-Data:
-{data_text}
+Task: Generate a detailed maintenance explanation based on the actions given in the {input_file}.
+Rules:
+- Summarise the actions of each condition 
+- clearly mention all the actions and do NOT miss anything
+- Another thing to add is do NOT repeat a sentence or action.
 
-Task: Rewrite the provided recommendations below into a single, cohesive professional paragraph.
-- You MUST include ALL specific actions, timeframes (e.g., 5-10 days), and safety notes.
-- Do NOT summarize or shorten. 
-- Connect the points fluently.
+Maintenance Actions:
+{rec_text}
 
-Recommendations:
+Detailed Explanation:
 """
         inputs = self.tokenizer(prompt, return_tensors="pt", truncation=True).to(self.device)
 
         outputs = self.model.generate(
             **inputs,
-            max_length=300,
-            min_length=60,
+            max_length=500,
+            min_length=50,
             do_sample=True,
-            temperature=0.3, 
-            top_p=0.92,
-            repetition_penalty=1.2,
-            early_stopping=True
+            temperature=0.1,  # Lower temp for more deterministic/focused output
+            top_p=0.9,
+            repetition_penalty=2.0, # High penalty for repetition
         )
 
         explanation = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
-        return explanation
+        return explanation.strip()
 
     def log_interaction(self, input_trace, output_explanation, user_feedback=None):
         log_entry = {
@@ -177,6 +225,9 @@ def main():
             print("\nFeedback: Accepted")
             print("Action: Continuing along the pipeline...")
             feedback = "Accepted"
+            
+            # Update Knowledge Base on Acceptance
+            explainer.update_knowledge_base(decision_trace, explanation)
             break
         elif choice in ['2', 'reject']:
             print("\nFeedback: Rejected")

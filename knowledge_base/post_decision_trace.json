@@ -1,0 +1,26 @@
+{
+  "alert_id": "alert_0c7723c6",
+  "component_id": "COMPRESSOR",
+  "timestamp": "2026-01-31T10:51:01.654476",
+  "decision": "BORDERLINE",
+  "final_confidence": 0.5,
+  "rules_triggered": [
+    "COMP_VIB_INSTABILITY"
+  ],
+  "reasoning_trace": [
+    {
+      "step_id": 1,
+      "rule": "COMP_VIB_INSTABILITY",
+      "feature": "vibration_rms",
+      "feature_value": 6.92,
+      "threshold": 5.5,
+      "comparison": ">",
+      "rule_result": "FIRED",
+      "confidence_after_step": 0.5,
+      "timestamp": "2026-01-31T10:51:01.654500"
+    }
+  ],
+  "expected_behavior": "NORMAL",
+  "observed_behavior": "DEGRADING",
+  "expectation_mismatch": true
+}

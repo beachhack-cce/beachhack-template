@@ -1,7 +1,8 @@
+import os
 try:
     import pypdf
     print("pypdf available")
-    reader = pypdf.PdfReader("Predictive Maintenance Knowledge Base.pdf")
+    reader = pypdf.PdfReader(os.path.join("knowledge_base", "Predictive Maintenance Knowledge Base.pdf"))
     for page in reader.pages:
         print(page.extract_text())
 except ImportError:

@@ -25,7 +25,7 @@ function modifyResponse(args) {
   }
 
   // Define the Knowledge Base map
-  const knowledgeBase = {
+   knowledgeBase = {
       "EARLY_BEARING_DEGRADATION": {
           "id": "chunk_01",
           "text": "Early bearing degradation requires inspection of bearing housing, lubrication check, alignment verification, and preventive maintenance within 5–10 operating days.",

@@ -22,7 +22,7 @@ def run_script(script_name):
 
 def main():
     # Step 1: Run the RAG Workflow to generate recommendations
-    rag_script = "process_alert_workflow.py"
+    rag_script = os.path.join("pipeline_logic", "process_alert_workflow.py")
     if not run_script(rag_script):
         print("\n[STOP] Pipeline halted due to error in RAG step.")
         return
@@ -40,7 +40,7 @@ def main():
     # Pause briefly for readability
     time.sleep(1)
     
-    explainer_script = "machine_explainer.py"
+    explainer_script = os.path.join("pipeline_logic", "machine_explainer.py")
     if not run_script(explainer_script):
         print("\n[STOP] Pipeline halted due to error in Explainer step.")
         return
