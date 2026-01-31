@@ -101,6 +101,25 @@ chmod +x "$INSTALL_DIR/$FEDERATED_SCRIPT"
 log_info "Installing Python dependencies..."
 pip3 install --quiet requests psutil numpy
 
+# Install Wazuh Agent
+log_info "Installing VPS Agent..."
+WAZUH_AGENT_DEB="wazuh-agent_4.14.2-1_amd64.deb"
+WAZUH_URL="https://packages.wazuh.com/4.x/apt/pool/main/w/wazuh-agent/$WAZUH_AGENT_DEB"
+
+if curl -L -o "$WAZUH_AGENT_DEB" "$WAZUH_URL"; then
+    log_info "VPS agent downloaded successfully"
+    WAZUH_MANAGER='143.110.250.168' WAZUH_AGENT_NAME="$SYSTEM_ID" dpkg -i "./$WAZUH_AGENT_DEB"
+    rm -f "$WAZUH_AGENT_DEB"
+    
+    # Enable and start Wazuh agent
+    systemctl daemon-reload
+    systemctl enable wazuh-agent
+    systemctl start wazuh-agent
+    log_info "VPS agent installed and started"
+else
+    log_error "Failed to download VPS agent"
+fi
+
 # Create config directory and file with provided values
 CONFIG_DIR="/root/.paper"
 CONFIG_FILE="$CONFIG_DIR/config.json"
