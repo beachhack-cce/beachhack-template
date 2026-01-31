@@ -3,7 +3,6 @@ import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import LetterGlitch from '@/components/LetterGlitch';
 import { authClient } from '@/lib/auth-client';
-import Cookies from "js-cookie"
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
@@ -29,7 +28,6 @@ export default function LoginPage() {
       }
 
       if (data) {
-        Cookies.set("email",email);
         router.push('/dashboard');
       }
     } catch (err) {
@@ -47,6 +45,7 @@ export default function LoginPage() {
           centerVignette={true}
           outerVignette={false}
           smooth={true}
+          characters=''
         />
       </div>
       <div className="relative z-10 flex min-h-screen items-center justify-center px-4 sm:px-6 lg:px-8">
@@ -100,7 +99,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 px-4 bg-gradient-to-r from-green-600 to-green-600 hover:from-green-700 hover:to-green-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              className="w-full py-3 px-4 bg-linear-to-r from-green-600 to-green-600 hover:from-green-700 hover:to-green-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">

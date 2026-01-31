@@ -5,6 +5,7 @@ import {
   SidebarProvider,
 } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
+import { AIChatWidget } from "./components/AIChatWidget";
 
 function layout({
   children,
@@ -24,6 +25,7 @@ function layout({
       <SidebarInset className="bg-black text-white min-h-screen">
         <SiteHeader />
         {children}
+        <AIChatWidget />
       </SidebarInset>
     </SidebarProvider>
   )
