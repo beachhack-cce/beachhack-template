@@ -6,6 +6,8 @@ import { chatRouter } from "./chat";
 import { contextRouter } from "./context";
 import { vulnerabilityRouter } from './vulnerability';
 import { alertRouter } from "./alert";
+import { twilioRouter } from "./twilio.router";
+import { systemRouter } from "./system.router";
 import { hostRouter } from "./host";
 
 export const appRouter = createTRPCRouter({
@@ -19,6 +21,8 @@ export const appRouter = createTRPCRouter({
   chat: chatRouter,
   context: contextRouter,
   alert: alertRouter,
+  twilio: twilioRouter,
+  system: systemRouter,
   host: hostRouter,
   vulnerability: vulnerabilityRouter
 });

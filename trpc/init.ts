@@ -5,15 +5,17 @@ import { headers } from "next/headers";
 import { db } from "@/db";
 import { auth } from "@/lib/auth";
 
+
 export const createTRPCContext = cache(async (opts?: { req?: Request }) => {
   const heads = new Headers(opts?.req?.headers ?? (await headers()));
+
   const authSession = await auth.api.getSession({
     headers: heads,
   });
 
   return {
     auth: authSession,
-    db: db
+    db,
   };
 });
 
@@ -28,10 +30,12 @@ const isAuthenticated = t.middleware(({ ctx, next }) => {
       message: "Unauthorized",
     });
   }
+
   return next();
 });
 
 export const createTRPCRouter = t.router;
 export const createCallerFactory = t.createCallerFactory;
+
 export const publicProcedure = t.procedure;
 export const protectedProcedure = t.procedure.use(isAuthenticated);

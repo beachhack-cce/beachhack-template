@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Cpu, MemoryStick, Monitor, AlertTriangle, CheckCircle, Server, X, Clock, HardDrive, Network, Activity } from "lucide-react"
+import { Cpu, MemoryStick, Monitor, AlertTriangle, CheckCircle, Server, Clock, HardDrive, Network, Activity } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { trpc } from "@/trpc/client"
 
 interface Alert {
   id: number
@@ -20,7 +21,7 @@ interface Alert {
 }
 
 interface SystemMetric {
-  id: number
+  id: string
   name: string
   cpu: number
   ram: number
@@ -28,137 +29,15 @@ interface SystemMetric {
   alerts: number
   alertDetails: Alert[]
   disk: number
-  network: number
-  uptime: string
+  network: any
+  uptime?: string
   lastUpdated: string
-  cpuHistory: number[]
-  ramHistory: number[]
-  processes: number
-  ipAddress: string
-  os: string
+  cpuHistory?: number[]
+  ramHistory?: number[]
+  processes?: number
+  ipAddress?: string
+  os?: string
 }
-
-const systemMetrics: SystemMetric[] = [
-  {
-    id: 1,
-    name: "Production Server",
-    cpu: 45,
-    ram: 62,
-    status: "healthy",
-    alerts: 0,
-    alertDetails: [],
-    disk: 55,
-    network: 78,
-    uptime: "45 days, 12 hours",
-    lastUpdated: "2 seconds ago",
-    cpuHistory: [42, 38, 45, 52, 48, 45],
-    ramHistory: [58, 60, 62, 61, 63, 62],
-    processes: 124,
-    ipAddress: "192.168.1.10",
-    os: "Ubuntu 22.04 LTS",
-  },
-  {
-    id: 2,
-    name: "Database Server",
-    cpu: 78,
-    ram: 85,
-    status: "warning",
-    alerts: 2,
-    alertDetails: [
-      { id: 1, type: "warning", message: "High memory usage detected (85%)", timestamp: "5 min ago" },
-      { id: 2, type: "warning", message: "CPU usage spike detected", timestamp: "12 min ago" },
-    ],
-    disk: 72,
-    network: 45,
-    uptime: "30 days, 8 hours",
-    lastUpdated: "5 seconds ago",
-    cpuHistory: [65, 70, 75, 82, 78, 78],
-    ramHistory: [78, 80, 82, 84, 86, 85],
-    processes: 89,
-    ipAddress: "192.168.1.20",
-    os: "CentOS 8",
-  },
-  {
-    id: 3,
-    name: "API Gateway",
-    cpu: 23,
-    ram: 41,
-    status: "healthy",
-    alerts: 0,
-    alertDetails: [],
-    disk: 30,
-    network: 92,
-    uptime: "60 days, 3 hours",
-    lastUpdated: "1 second ago",
-    cpuHistory: [20, 22, 25, 21, 24, 23],
-    ramHistory: [38, 40, 42, 41, 40, 41],
-    processes: 45,
-    ipAddress: "192.168.1.30",
-    os: "Alpine Linux",
-  },
-  {
-    id: 4,
-    name: "Cache Server",
-    cpu: 92,
-    ram: 88,
-    status: "critical",
-    alerts: 5,
-    alertDetails: [
-      { id: 1, type: "critical", message: "CPU usage critical (92%)", timestamp: "1 min ago" },
-      { id: 2, type: "critical", message: "Memory usage critical (88%)", timestamp: "2 min ago" },
-      { id: 3, type: "critical", message: "Service restart required", timestamp: "5 min ago" },
-      { id: 4, type: "warning", message: "High disk I/O detected", timestamp: "10 min ago" },
-      { id: 5, type: "warning", message: "Connection pool exhausted", timestamp: "15 min ago" },
-    ],
-    disk: 85,
-    network: 67,
-    uptime: "5 days, 2 hours",
-    lastUpdated: "3 seconds ago",
-    cpuHistory: [85, 88, 90, 91, 93, 92],
-    ramHistory: [82, 84, 86, 87, 89, 88],
-    processes: 156,
-    ipAddress: "192.168.1.40",
-    os: "Debian 11",
-  },
-  {
-    id: 5,
-    name: "Worker Node 1",
-    cpu: 56,
-    ram: 67,
-    status: "healthy",
-    alerts: 1,
-    alertDetails: [
-      { id: 1, type: "info", message: "Scheduled maintenance in 2 days", timestamp: "1 hour ago" },
-    ],
-    disk: 45,
-    network: 55,
-    uptime: "20 days, 15 hours",
-    lastUpdated: "4 seconds ago",
-    cpuHistory: [50, 52, 55, 58, 54, 56],
-    ramHistory: [62, 64, 66, 68, 67, 67],
-    processes: 78,
-    ipAddress: "192.168.1.50",
-    os: "Ubuntu 20.04 LTS",
-  },
-  {
-    id: 6,
-    name: "Worker Node 2",
-    cpu: 34,
-    ram: 52,
-    status: "healthy",
-    alerts: 0,
-    alertDetails: [],
-    disk: 38,
-    network: 48,
-    uptime: "20 days, 15 hours",
-    lastUpdated: "2 seconds ago",
-    cpuHistory: [30, 32, 35, 33, 36, 34],
-    ramHistory: [48, 50, 52, 51, 53, 52],
-    processes: 65,
-    ipAddress: "192.168.1.51",
-    os: "Ubuntu 20.04 LTS",
-  },
-]
 
 function getStatusColor(status: string) {
   switch (status) {
@@ -212,13 +91,13 @@ function UsageBar({ value, label }: { value: number; label: string }) {
 }
 
 function MiniChart({ data, color }: { data: number[]; color: string }) {
-  const max = Math.max(...data)
-  const min = Math.min(...data)
+  const max = Math.max(...data || [0])
+  const min = Math.min(...data || [0])
   const range = max - min || 1
   
   return (
     <div className="flex items-end gap-1 h-8">
-      {data.map((value, index) => (
+      {(data || []).map((value, index) => (
         <div
           key={index}
           className={`w-2 ${color} rounded-t opacity-70 hover:opacity-100 transition-opacity`}
@@ -243,7 +122,7 @@ function SystemDetailDialog({ system, open, onClose }: { system: SystemMetric | 
               </div>
               <div>
                 <h2 className="text-xl font-bold text-white">{system.name}</h2>
-                <p className="text-sm text-gray-400">{system.ipAddress} • {system.os}</p>
+                <p className="text-sm text-gray-400">{system.ipAddress ?? ""} • {system.os ?? ""}</p>
               </div>
             </div>
             <Badge variant="outline" className={`${getStatusColor(system.status)} capitalize`}>
@@ -259,14 +138,14 @@ function SystemDetailDialog({ system, open, onClose }: { system: SystemMetric | 
                 <Clock className="h-3 w-3" />
                 Uptime
               </div>
-              <p className="text-white font-medium text-sm">{system.uptime}</p>
+              <p className="text-white font-medium text-sm">{system.uptime ?? "n/a"}</p>
             </div>
             <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3">
               <div className="flex items-center gap-2 text-gray-400 text-xs mb-1">
                 <Activity className="h-3 w-3" />
                 Processes
               </div>
-              <p className="text-white font-medium text-sm">{system.processes}</p>
+              <p className="text-white font-medium text-sm">{system.processes ?? "n/a"}</p>
             </div>
             <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3">
               <div className="flex items-center gap-2 text-gray-400 text-xs mb-1">
@@ -280,7 +159,7 @@ function SystemDetailDialog({ system, open, onClose }: { system: SystemMetric | 
                 <Network className="h-3 w-3" />
                 Network
               </div>
-              <p className={`font-medium text-sm ${getUsageColor(system.network)}`}>{system.network}%</p>
+              <p className={`font-medium text-sm ${getUsageColor(0)}`}>{/* show bytes or rate if available */}</p>
             </div>
           </div>
 
@@ -296,7 +175,7 @@ function SystemDetailDialog({ system, open, onClose }: { system: SystemMetric | 
               <UsageBar value={system.cpu} label="" />
               <div className="mt-3">
                 <p className="text-xs text-gray-400 mb-2">History (last 6 readings)</p>
-                <MiniChart data={system.cpuHistory} color={system.cpu >= 90 ? "bg-red-500" : system.cpu >= 70 ? "bg-yellow-500" : "bg-green-500"} />
+                <MiniChart data={system.cpuHistory ?? [system.cpu]} color={system.cpu >= 90 ? "bg-red-500" : system.cpu >= 70 ? "bg-yellow-500" : "bg-green-500"} />
               </div>
             </div>
 
@@ -311,7 +190,7 @@ function SystemDetailDialog({ system, open, onClose }: { system: SystemMetric | 
               <UsageBar value={system.ram} label="" />
               <div className="mt-3">
                 <p className="text-xs text-gray-400 mb-2">History (last 6 readings)</p>
-                <MiniChart data={system.ramHistory} color={system.ram >= 90 ? "bg-red-500" : system.ram >= 70 ? "bg-yellow-500" : "bg-green-500"} />
+                <MiniChart data={system.ramHistory ?? [system.ram]} color={system.ram >= 90 ? "bg-red-500" : system.ram >= 70 ? "bg-yellow-500" : "bg-green-500"} />
               </div>
             </div>
           </div>
@@ -373,6 +252,9 @@ export function SectionCards() {
   const [selectedSystem, setSelectedSystem] = useState<SystemMetric | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
 
+  // fetch from trpc
+  const { data: systems, isLoading, error } = trpc.system.getAll.useQuery()
+
   const handleCardClick = (system: SystemMetric) => {
     setSelectedSystem(system)
     setDialogOpen(true)
@@ -388,8 +270,11 @@ export function SectionCards() {
         <p className="text-gray-400 text-xs mt-1">Click on a system to view detailed information</p>
       </div>
 
+      {isLoading && <div className="text-gray-400">Loading systems...</div>}
+      {error && <div className="text-red-400">Failed to load systems</div>}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
-        {systemMetrics.map((system) => (
+        {(systems || []).map((system: SystemMetric) => (
           <Card 
             key={system.id} 
             className="bg-black/60 backdrop-blur-sm border-green-500/20 hover:border-green-500/40 transition-all duration-300 hover:shadow-lg hover:shadow-green-500/10 cursor-pointer"
@@ -448,24 +333,24 @@ export function SectionCards() {
       <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
         <div className="bg-black/60 backdrop-blur-sm border border-green-500/20 rounded-lg p-2.5 md:p-3">
           <p className="text-[10px] md:text-xs text-gray-400">Total Systems</p>
-          <p className="text-lg md:text-xl font-bold text-white">{systemMetrics.length}</p>
+          <p className="text-lg md:text-xl font-bold text-white">{(systems || []).length}</p>
         </div>
         <div className="bg-black/60 backdrop-blur-sm border border-green-500/20 rounded-lg p-2.5 md:p-3">
           <p className="text-[10px] md:text-xs text-gray-400">Healthy</p>
           <p className="text-lg md:text-xl font-bold text-green-400">
-            {systemMetrics.filter(s => s.status === "healthy").length}
+            {(systems || []).filter((s: SystemMetric) => s.status === "healthy").length}
           </p>
         </div>
         <div className="bg-black/60 backdrop-blur-sm border border-green-500/20 rounded-lg p-2.5 md:p-3">
           <p className="text-[10px] md:text-xs text-gray-400">Warnings</p>
           <p className="text-lg md:text-xl font-bold text-yellow-400">
-            {systemMetrics.filter(s => s.status === "warning").length}
+            {(systems || []).filter((s: SystemMetric) => s.status === "warning").length}
           </p>
         </div>
         <div className="bg-black/60 backdrop-blur-sm border border-green-500/20 rounded-lg p-2.5 md:p-3">
           <p className="text-[10px] md:text-xs text-gray-400">Critical</p>
           <p className="text-lg md:text-xl font-bold text-red-400">
-            {systemMetrics.filter(s => s.status === "critical").length}
+            {(systems || []).filter((s: SystemMetric) => s.status === "critical").length}
           </p>
         </div>
       </div>
