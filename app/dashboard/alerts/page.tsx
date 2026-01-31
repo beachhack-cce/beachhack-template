@@ -214,7 +214,7 @@ export default function AlertsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white p-6">
+    <div className="min-h-screen bg-linear-to-bl from-black via-green-800/40 to-black text-white p-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-3">
@@ -242,7 +242,7 @@ export default function AlertsPage() {
         </button>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        <div className="p-4 bg-linear-to-br from-red-900/30 to-gray-900 rounded-xl border border-red-500/30">
+        <div className="p-4 bg-linear-to-br from-red-900/30 to-red-900 rounded-xl border border-red-500/30">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-400 text-sm">Critical</p>
@@ -255,7 +255,7 @@ export default function AlertsPage() {
             </div>
           </div>
         </div>
-        <div className="p-4 bg-linear-to-br from-yellow-900/30 to-gray-900 rounded-xl border border-yellow-500/30">
+        <div className="p-4 bg-linear-to-br from-green-900/30 to-green-900 rounded-xl border border-yellow-500/30">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-400 text-sm">Warning</p>
@@ -268,7 +268,7 @@ export default function AlertsPage() {
             </div>
           </div>
         </div>
-        <div className="p-4 bg-linear-to-br from-blue-900/30 to-gray-900 rounded-xl border border-blue-500/30">
+        <div className="p-4 bg-linear-to-br from-yellow-900/30 to-yellow-900 rounded-xl border border-blue-500/30">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-400 text-sm">Info</p>
