@@ -263,6 +263,7 @@ def render_trace_panel(trace):
     
     for i, step in enumerate(reasoning, 1):
         rule = step.get("rule", "UNKNOWN")
+        feature_name = step.get("feature", "unknown_sensor")
         val = step.get("feature_value", 0)
         thresh = step.get("threshold", 0)
         comp = step.get("comparison", ">")
@@ -276,7 +277,7 @@ def render_trace_panel(trace):
         # Build HTML as a single concatenated string to avoid indentation issues
         step_html = f'<div class="trace-step">'
         step_html += f'<div class="trace-step-header"><span class="step-circle">{i}</span><span class="node-name">NODE: {rule}</span></div>'
-        step_html += f'<div class="logic-box">Value: <span class="{val_style}">{val}</span> {comp} Threshold: {thresh}</div>'
+        step_html += f'<div class="logic-box"><span style="font-size: 0.8em; color: #8b949e; margin-right: 8px;">[SENSOR: {feature_name}]</span> Value: <span class="{val_style}">{val}</span> {comp} Threshold: {thresh}</div>'
         step_html += f'<div style="margin-top: 8px; display: flex; align-items: center;"><span class="result-badge {res_class}">RESULT: {res}</span><span style="font-size: 0.8rem; color: #8b949e;">Condition: {cond_text}</span></div>'
         step_html += '</div>'
         

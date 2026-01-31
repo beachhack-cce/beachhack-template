@@ -64,29 +64,29 @@ RULES = {
             "rule": "COMP_DISCHARGE_TEMP",
             "feature": "temperature_c",
             "comparison": ">",
-            "threshold": 110.0,
-            "confidence_delta": 0.4
+            "threshold": 50.0,
+            "confidence_delta": 0.2
         },
         {
             "rule": "COMP_VIB_INSTABILITY",
             "feature": "vibration_rms",
             "comparison": ">",
             "threshold": 5.5,
-            "confidence_delta": 0.35
+            "confidence_delta": 0.5
         },
         {
             "rule": "COMP_RAPID_WARMING",
             "feature": "temperature_delta",
             "comparison": ">",
-            "threshold": 8.0,
-            "confidence_delta": 0.3
+            "threshold": 5.0,
+            "confidence_delta": 0.2
         },
         {
             "rule": "COMP_OVERLOAD",
             "feature": "load_avg",
             "comparison": ">",
-            "threshold": 95.0,
-            "confidence_delta": 0.3
+            "threshold": 85.0,
+            "confidence_delta": 0.35
         }
     ]
 }

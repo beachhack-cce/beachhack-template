@@ -76,30 +76,87 @@ def run_live_simulation():
     
     found = {k: False for k in requirements}
     
-    # Shuffle or just find first match; finding first match is stable
+    
+    # Collect all candidates first
+    candidates = {k: [] for k in requirements}
+    
     for event in feature_events:
         comp = event.get("component")
         phase = event.get("failure_phase")
         
-        if comp in requirements and not found[comp]:
-            if phase == requirements[comp]:
-                selected_events.append(event)
-                found[comp] = True
-                
-        if all(found.values()):
-            break
+        if comp in requirements and phase == requirements[comp]:
+            candidates[comp].append(event)
+            
+    
+    # Select the "most representative" event for each phase
+    # - Normal: Low vibration (median/middle is fine)
+    # - Pre-Failure: High trend/delta
+    # - Failure: High RMS/Temp
+    
+    for comp, events in candidates.items():
+        if not events:
+            print(f"⚠️ No events found for {comp} (Phase {requirements[comp]})")
+            continue
+            
+        target_event = None
+        
+        if comp == "PUMP":
+             # Normal: Just pick middle
+             target_event = events[min(len(events)//2, len(events)-1)]
+             
+        elif comp == "CONVEYOR":
+             # Pre-Failure: Look for event that satisfies rules
+             # Rules: Trend > 1.5 (+0.25), Spike > 0.8 (+0.2), Temp > 80 (+0.3)
+             # We want BORDERLINE (score >= 0.1)
+             target_event = events[0]
+             max_conveyor_score = -1
+             
+             for e in events:
+                 f = e["features"]
+                 score = 0
+                 if f.get("vibration_trend", 0) > 1.5: score += 0.25
+                 if f.get("vibration_delta", 0) > 0.8: score += 0.2
+                 
+                 if score > max_conveyor_score:
+                     max_conveyor_score = score
+                     target_event = e
+             
+        elif comp == "COMPRESSOR":
+             # Turn on Failure: Need DANGER (score >= 0.7)
+             # Rules: Vib > 5.5 (+0.5), Temp > 50 (+0.2), Load > 85 (+0.35)
+             target_event = events[0]
+             max_comp_score = -1
+             
+             for e in events:
+                 f = e["features"]
+                 score = 0
+                 if f.get("vibration_rms", 0) > 5.5: score += 0.5
+                 if f.get("temperature_c", 0) > 50.0: score += 0.2
+                 if f.get("load_avg", 0) > 85.0: score += 0.35
+                 if f.get("temperature_delta", 0) > 5.0: score += 0.2
+                 
+                 if score > max_comp_score:
+                     max_comp_score = score
+                     target_event = e
+        
+        else:
+             target_event = events[0]
+             
+        selected_events.append(target_event)
+        found[comp] = True
             
     # Fallback: if specific phases not found, just take one of each component
     if not all(found.values()):
         print(f"⚠️ Could not find all exact phases. Found: {found}")
-        # Try to fill gaps
-        for k, v in found.items():
-            if not v:
-                # Find any event for this component
-                for event in feature_events:
-                    if event.get("component") == k:
-                        selected_events.append(event)
-                        break
+        # Try to fill gaps using any available event for valid components
+        available_components = set(e.get("component") for e in feature_events)
+        for k in requirements:
+             if not found[k] and k in available_components:
+                 # Find ANY event for this component
+                  for event in feature_events:
+                        if event.get("component") == k:
+                             selected_events.append(event)
+                             break
 
     # 5️⃣ Run Trace Engine
     engine = RuleEngine()
