@@ -18,6 +18,7 @@ const Home: React.FC = () => {
   });
 
   const providers: Provider[] = data?.servers?.map(serverToProvider) ?? [];
+  const sortedProviders = [...providers].sort((a, b) => a.name.localeCompare(b.name));
   const [history, setHistory] = useState<HistoryPoint[]>([]);
   const lastTimestamp = useRef<string | null>(null);
 
@@ -52,7 +53,7 @@ const Home: React.FC = () => {
       {!isLoading && !isError && (
         <>
           <div className={styles.grid}>
-            {providers.map((p, index) => (
+            {sortedProviders.map((p, index) => (
               <DashboardCard key={p.name} {...p} index={index} />
             ))}
           </div>
@@ -60,7 +61,7 @@ const Home: React.FC = () => {
             <h2 className={styles.sectionTitle}>Live metrics: Gateway score over time</h2>
             <MetricsChart
               history={history}
-              currentProviders={providers.map((p) => ({
+              currentProviders={sortedProviders.map((p) => ({
                 name: p.name,
                 score: p.score,
                 latency: p.latency,
