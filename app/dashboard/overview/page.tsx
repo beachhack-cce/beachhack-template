@@ -8,11 +8,11 @@ export default function Overview() {
       <div className="flex flex-col gap-4 py-4 md:py-6 w-full">
         <SectionCards />
         
-        <div className="px-4 lg:px-6">
+        {/* <div className="px-4 lg:px-6">
           <div className="rounded-xl border border-green-500/20 bg-black/60 backdrop-blur-sm p-4 shadow-lg shadow-green-500/5">
             <ChartAreaInteractive />
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   )
