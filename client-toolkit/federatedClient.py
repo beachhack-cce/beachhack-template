@@ -67,8 +67,8 @@ class Config:
     
     # Collection settings
     COLLECTION_INTERVAL_SEC: int = 10          # How often to collect metrics
-    SLIDING_WINDOW_MINUTES: int = 15           # Size of the sliding window
-    FEDERATED_UPDATE_INTERVAL_SEC: int = 300   # How often to send federated updates (5 min)
+    SLIDING_WINDOW_MINUTES: int = 1          # Size of the sliding window
+    FEDERATED_UPDATE_INTERVAL_SEC: int = 30   # How often to send federated updates (5 min)
     
     # Aggregator endpoint (production server)
     AGGREGATOR_ENDPOINT: str = "http://143.110.250.168:8080/federated/update"
