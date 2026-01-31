@@ -50,14 +50,65 @@ function formatTimestamp(timestamp: string | number): string {
 
 function formatSampleCount(count: number): string {
   if (!count && count !== 0) return "0";
-  
-  if (count >= 1000000) {
-    const millions = count / 1000000;
-    const rounded = Math.floor(millions * 2) / 2;
-    return `${rounded}M+`;
+  if(count >= 1e50) {
+
+    // Vigintillions - show as multiple T's and B
+    const val = Math.floor(count / 1e50);
+    return `${val}TTTTTTTTTTTB`;
   }
-  
-  return count.toLocaleString();
+  if(count >= 1e30) {
+    // Nonillions - show as multiple T's and B
+    const val = Math.floor(count / 1e30);
+    return `${val}TTTTTTB`;
+  }
+  if(count >= 1e27) { 
+
+    // Octillions - show as multiple T's and B
+    const val = Math.floor(count / 1e27);
+    return `${val}TTTTTB`;
+  }
+  // For extremely large numbers, use combined notation
+  if (count >= 1e24) {
+    // Septillions - show as multiple T's and B
+    const val = Math.floor(count / 1e24);
+    return `${val}TTTTB`;
+  }
+  if (count >= 1e21) {
+    // Sextillions
+    const val = Math.floor(count / 1e21);
+    return `${val}TTTB`;
+  }
+  if (count >= 1e18) {
+    // Quintillions
+    const val = Math.floor(count / 1e18);
+    return `${val}TTB`;
+  }
+  if (count >= 1e15) {
+    // Quadrillions
+    const val = Math.floor(count / 1e15);
+    return `${val}TB`;
+  }
+  if (count >= 1e12) {
+    // Trillions
+    const val = Math.floor(count / 1e12);
+    return `${val}T`;
+  }
+  if (count >= 1e9) {
+    // Billions
+    const val = Math.floor(count / 1e9);
+    return `${val}B`;
+  }
+  if (count >= 1e6) {
+    // Millions
+    const val = Math.floor(count / 1e6);
+    return `${val}M`;
+  }
+  if (count >= 1e3) {
+    // Thousands
+    const val = Math.floor(count / 1e3);
+    return `${val}K`;
+  }
+  return count.toString();
 }
 
 function SmartAnalytics() {
@@ -177,8 +228,7 @@ function SmartAnalytics() {
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
             <StatCard label="Total Nodes" value={cluster.total_nodes} />
             <StatCard label="Active" value={cluster.active_nodes} color="text-green-400" />
-            <StatCard label="Stale" value={cluster.stale_nodes} color="text-yellow-400" />
-            <StatCard label="Samples" value={formatSampleCount(cluster.total_samples)} />
+            <StatCard label="Stale" value={cluster.stale_nodes} color="text-yellow-400" /> 
             <StatCard label="Avg Distance" value={cluster.avg_distance_from_centroid?.toFixed(2)} />
             <StatCard label="Outliers" value={cluster.outlier_count} color="text-red-400" />
           </div>
@@ -265,7 +315,7 @@ function SmartAnalytics() {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <InfoCard label="Client ID" value={nodeDetails.client_id} mono />
                     <InfoCard label="Last Seen" value={formatTimestamp(nodeDetails.last_seen)} />
-                    <InfoCard label="Samples" value={formatSampleCount(nodeDetails.num_samples)} />
+                    
                     <InfoCard label="Updates" value={nodeDetails.update_count} />
                     <InfoCard
                       label="Status"
@@ -375,10 +425,7 @@ function NodeCard({
       </div>
 
       <div className="grid grid-cols-2 gap-4 mb-4">
-        <div>
-          <p className="text-xs text-gray-400">Samples</p>
-          <p className="text-lg font-semibold text-white">{formatSampleCount(node.num_samples)}</p>
-        </div>
+       
         <div>
           <p className="text-xs text-gray-400">Updates</p>
           <p className="text-lg font-semibold text-white">{node.update_count}</p>

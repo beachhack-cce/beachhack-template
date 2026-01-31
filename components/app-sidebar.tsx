@@ -71,6 +71,11 @@ const routes = {
       title: "Reports",
       url: "/dashboard/reports",
       icon: IconReport,
+    },
+    {
+      title: "Realtime Vuln",
+      url: "/dashboard/vunlnerabilty",
+      icon: IconSearch,
     }
   ],
   navClouds: [
