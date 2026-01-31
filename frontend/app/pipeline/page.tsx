@@ -199,7 +199,10 @@ export default function PipelinePage() {
             {/* Left Sidebar: Stack Info */}
             <div className="lg:w-1/3 space-y-6">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight mb-2">Configure Pipeline</h1>
+                    <div className="flex items-center justify-between mb-2">
+                        <h1 className="text-3xl font-bold tracking-tight">Configure Pipeline</h1>
+
+                    </div>
                     <p className="text-muted-foreground">Review and order your workflow steps.</p>
                 </div>
 
@@ -269,6 +272,7 @@ export default function PipelinePage() {
                                 </Badge>
                             </div>
                         </CardContent>
+
                     </Card>
                 </div>
 
@@ -281,6 +285,12 @@ export default function PipelinePage() {
                         </CardContent>
                     </Card>
                 )}
+
+                <Link href="/automation">
+                    <Button variant="destructive" size="default">
+                        Automation
+                    </Button>
+                </Link>
             </div>
 
             {/* Right Content: Builder */}
