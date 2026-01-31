@@ -229,8 +229,7 @@ if [ -z "$PUBLIC_IP" ]; then
     PUBLIC_IP="127.0.0.1"
 fi
 
-# Extract base URL (remove /api/metrics if present)
-BASE_URL="${API_ENDPOINT%/api/metrics}"
+BASE_URL="${API_ENDPOINT}"
 HOST_ADD_URL="${BASE_URL}/host/add"
 
 log_info "Sending registration request to $HOST_ADD_URL"

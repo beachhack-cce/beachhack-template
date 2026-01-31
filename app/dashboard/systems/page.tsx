@@ -79,7 +79,7 @@ function Systems() {
   };
 
   const getCurlCommand = () => {
-    return `curl -fsSL "https://raw.githubusercontent.com/aibelbin/paper/main/client-toolkit/install.sh" | sudo API_ENDPOINT="http://143.110.250.168:8000/api/metrics" SYSTEM_ID="${systemId}" MONITOR_INTERVAL="10" REQUEST_TIMEOUT="30" FEDERATED_COLLECTION_INTERVAL="10" FEDERATED_WINDOW_MINUTES="15" FEDERATED_AGGREGATOR_ENDPOINT="http://143.110.250.168:8000/federated/update" FEDERATED_UPDATE_INTERVAL="60" bash`
+    return `curl -fsSL "https://raw.githubusercontent.com/aibelbin/paper/main/client-toolkit/install.sh" | sudo API_ENDPOINT="http://143.110.250.168:8000" SYSTEM_ID="${systemId}" MONITOR_INTERVAL="10" REQUEST_TIMEOUT="30" FEDERATED_COLLECTION_INTERVAL="10" FEDERATED_WINDOW_MINUTES="15" FEDERATED_AGGREGATOR_ENDPOINT="http://143.110.250.168:8000/federated/update" FEDERATED_UPDATE_INTERVAL="60" bash`
   };
 
   const copyToClipboard = async () => {
