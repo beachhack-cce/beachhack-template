@@ -177,7 +177,7 @@ function Systems() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-bl from-black via-green-950/80 to-black text-white p-6">
+    <div className="min-h-screen bg-linear-to-bl from-black via-green-950/80 to-black text-white p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-white">Systems</h1>
         <button

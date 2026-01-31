@@ -108,7 +108,7 @@ function SmartAnalytics() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-bl from-black via-green-950/80 to-black text-white text-white p-6">
+    <div className="min-h-screen bg-linear-to-bl from-black via-green-950/80 to-black text-white p-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
           <h1 className="text-3xl font-bold text-emerald-400">Smart Analytics</h1>
@@ -127,7 +127,7 @@ function SmartAnalytics() {
       </div>
 
       {cluster && (
-        <div className="mb-8 p-6 bg-gradient-to-r from-green-900/30 to-green-800/60 backdrop-blur-3xl rounded-xl border border-green-700">
+        <div className="mb-8 p-6 bg-linear-to-r from-green-900/30 to-green-800/60 backdrop-blur-3xl rounded-xl border border-green-700">
           <h2 className="text-xl font-semibold text-emerald-400 mb-4">Cluster Overview</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
             <StatCard label="Total Nodes" value={cluster.total_nodes} />
@@ -151,7 +151,7 @@ function SmartAnalytics() {
       )}
 
       {compareMode && selectedNodes.length === 2 && compareResult && (
-        <div className="mb-8 p-6 bg-gradient-to-r from-green-900/30 to-green-800/60 backdrop-blur-3xl rounded-xl border border-emerald-500/50">
+        <div className="mb-8 p-6 bg-linear-to-r from-green-900/30 to-green-800/60 backdrop-blur-3xl rounded-xl border border-emerald-500/50">
           <h2 className="text-xl font-semibold text-emerald-400 mb-4">Comparison Results</h2>
           {compareLoading ? (
             <div className="flex justify-center py-4">
@@ -309,7 +309,7 @@ function NodeCard({
       className={`p-6 rounded-xl cursor-pointer transition-all duration-300 transform hover:scale-[1.02] ${
         isSelected
           ? "bg-emerald-500/20 border-2 border-emerald-500"
-          : "bg-gradient-to-br from-green-900 to-green-800/20 border backdrop-blur-3xl hover:border-emerald-500/50"
+          : "bg-linear-to-br from-green-900 to-green-800/20 border backdrop-blur-3xl hover:border-emerald-500/50"
       }`}
     >
       <div className="flex justify-between items-start mb-4">

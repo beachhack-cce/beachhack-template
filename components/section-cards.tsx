@@ -334,7 +334,7 @@ function SystemDetailDialog({ system, open, onClose }: { system: SystemMetric | 
                     key={alert.id} 
                     className={`flex items-start gap-3 p-3 rounded-lg border ${getAlertTypeColor(alert.type)}`}
                   >
-                    <AlertTriangle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                    <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm text-white">{alert.message}</p>
                       <p className="text-xs text-gray-400 mt-1">{alert.timestamp}</p>
@@ -398,10 +398,10 @@ export function SectionCards() {
             <CardHeader className="pb-2 pt-3 px-3 md:px-4">
               <div className="flex items-start justify-between gap-2">
                 <CardTitle className="text-xs md:text-sm font-medium text-white flex items-center gap-1.5 truncate">
-                  <Monitor className="h-3.5 w-3.5 text-green-400 flex-shrink-0" />
+                  <Monitor className="h-3.5 w-3.5 text-green-400 shrink-0" />
                   <span className="truncate">{system.name}</span>
                 </CardTitle>
-                <div className="flex items-center gap-1 flex-shrink-0">
+                <div className="flex items-center gap-1 shrink-0">
                   {system.alerts > 0 && (
                     <Badge 
                       variant="outline" 

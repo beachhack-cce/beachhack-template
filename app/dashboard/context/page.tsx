@@ -73,7 +73,7 @@ export default function ContextPage() {
   const isSaving = saveContextMutation.isPending;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-green-950/80 to-black p-4 md:p-8">
+    <div className="min-h-screen bg-linear-to-br from-black via-green-950/80 to-black p-4 md:p-8">
       <div className="mx-auto max-w-4xl">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-3">

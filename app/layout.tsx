@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Tomorrow } from "next/font/google";
 import "./globals.css";
-import { TRPCProvider } from "@/trpc/client"; // 👈 ADD THIS
-
+import { TRPCProvider } from "@/trpc/client"; 
 const tomorrow = Tomorrow({
   subsets: ["latin"],
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],

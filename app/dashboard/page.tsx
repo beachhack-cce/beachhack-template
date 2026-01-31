@@ -1,18 +1,17 @@
 import { ChartAreaInteractive } from "@/components/chart-area-interactive"
-import { DataTable } from "@/components/data-table"
 import { SectionCards } from "@/components/section-cards"
 
-import data from "./data.json"
 
-export default function Page() {
+export default function Overview() {
   return (
-    <div className="min-h-screen flex flex-1 justify-center items-center flex-col bg-linear-to-br text-white from-black via-green-950/20 to-black">
-      <div className="flex flex-col gap-2 bg-black/80 backdrop-blur-sm w-full">
-        <div className="flex flex-col gap-4 justify-center items-center py-8 md:gap-6">
-          <h1 className="text-3xl font-bold text-white">
-            <span className="text-green-400">PAPER AI</span>
-          </h1>
-          <p className="text-gray-400">AI</p>
+    <div className="min-h-screen flex flex-1 flex-col bg-linear-to-bl from-black via-green-88/200/20 to-black">
+      <div className="flex flex-col gap-4 py-4 md:py-6 w-full">
+        <SectionCards />
+        
+        <div className="px-4 lg:px-6">
+          <div className="rounded-xl border border-green-500/20 bg-black/60 backdrop-blur-sm p-4 shadow-lg shadow-green-500/5">
+            <ChartAreaInteractive />
+          </div>
         </div>
       </div>
     </div>

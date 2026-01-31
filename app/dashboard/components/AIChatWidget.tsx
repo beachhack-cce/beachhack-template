@@ -16,7 +16,7 @@ export function AIChatWidget() {
     {
       id: "welcome",
       role: "assistant",
-      content: "Hi! I'm your analytics assistant. Ask me about nodes, anomalies, or comparisons.",
+      content: "Hi! I'm your Paper Ai. Ask me about nodes, anomalies, or comparisons.",
       timestamp: new Date(),
     },
   ]);
@@ -90,9 +90,8 @@ export function AIChatWidget() {
       </button>
 
       {isOpen && (
-        <div className="fixed bottom-24 right-6 z-50 w-80 sm:w-96 h-[500px] bg-gray-900 rounded-2xl border border-gray-700 shadow-2xl shadow-black/50 flex flex-col overflow-hidden">
-          {/* Header */}
-          <div className="p-4 border-b border-gray-800 bg-gradient-to-r from-gray-900 to-gray-800">
+        <div className="fixed bottom-24 right-6 z-50 w-80 sm:w-96 h-\[500px\] bg-gray-900 rounded-2xl border border-gray-700 shadow-2xl shadow-black/50 flex flex-col overflow-hidden">
+          <div className="p-4 border-b border-gray-800 bg-linear-to-r from-gray-900 to-gray-800">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
                 <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

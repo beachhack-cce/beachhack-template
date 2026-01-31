@@ -17,8 +17,10 @@ import {
   IconSearch,
   IconSettings,
   IconUsers,
+  IconServer,
+  IconShieldExclamation,
+  IconNotebook,
 } from "@tabler/icons-react"
-import { Server, ShieldAlert, NotebookText } from "lucide-react"
 import { NavMain } from "@/components/nav-main"
 import { NavUser } from "@/components/nav-user"
 import {
@@ -43,12 +45,12 @@ const routes = {
     {
       title: "Alerts",
       url: "/dashboard/alerts",
-      icon: ShieldAlert,
+      icon: IconShieldExclamation,
     },
     {
       title: "Systems",
       url: "/dashboard/systems",
-      icon: Server,
+      icon: IconServer,
     },
     {
       title: "Context",
@@ -140,12 +142,14 @@ const routes = {
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-const {
-		data: session,
-	} = authClient.useSession();
+  const {
+    data: session,
+  } = authClient.useSession();
+  
   if(!session){
     return null;
   }
+  
   return (
     <Sidebar collapsible="offcanvas" {...props} >
       <SidebarHeader>
@@ -153,11 +157,11 @@ const {
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
-              className="data-[slot=sidebar-menu-button]:!p-1.5 "
+              className="data-[slot=sidebar-menu-button]:\!p-1.5 "
             >
               <a href="#">
-                <NotebookText className="!h-7 !w-7" size={40} />   
-          <span className="text-3xl font-bold">Paper </span>
+                <IconNotebook className="\!h-7 \!w-7" size={40} />   
+                <span className="text-3xl font-bold">Paper </span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -167,7 +171,7 @@ const {
         <NavMain items={routes.navMain} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={session.user} />
+        <NavUser user={{ ...session.user, image: session.user.image ?? null }} />
       </SidebarFooter>
     </Sidebar>
   )

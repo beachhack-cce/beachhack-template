@@ -31,7 +31,7 @@ export function NavMain({
             <SidebarMenuItem className="text-4xl mb-2" key={item.title}>
               <Link href={item.url}>
               <SidebarMenuButton tooltip={item.title}>
-                {item.icon && <item.icon className="!w-6 !h-6"/>}
+                {item.icon && <item.icon className="\!w-6 \!h-6"/>}
                 <span className="text-2xl font-semibold">{item.title}</span>
               </SidebarMenuButton>
               </Link>
