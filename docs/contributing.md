@@ -23,6 +23,8 @@ npm run build
 * Follow existing architecture
 * No feature creep
 * Keep output deterministic
+* Do not modify Semgrep rules without review
+* AI prompt changes require discussion
 
 ---
 
