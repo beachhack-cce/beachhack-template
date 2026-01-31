@@ -13,7 +13,7 @@ Usage:
                 "command": "python3",
                 "args": ["/path/to/federatedMCP.py"],
                 "env": {
-                    "FEDERATED_SERVER_URL": "http://143.110.250.168:8080"
+                    "FEDERATED_SERVER_URL": "http://143.110.250.168:8000"
                 }
             }
         }
@@ -68,7 +68,7 @@ except ImportError:
 
 FEDERATED_SERVER_URL = os.environ.get(
     "FEDERATED_SERVER_URL", 
-    "http://143.110.250.168:8080"
+    "http://143.110.250.168:8000"
 )
 
 

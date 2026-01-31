@@ -2,20 +2,20 @@ import { createTRPCRouter, publicProcedure } from "@/trpc/init";
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 
-const BASE_URL = 'http://143.110.250.168:8080';
+const BASE_URL = 'http://143.110.250.168:8000';
 
 async function fetchWithTimeout(url: string, timeout = 10000) {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeout);
-  
+
   try {
     const response = await fetch(url, { signal: controller.signal });
     clearTimeout(id);
-    
+
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
-    
+
     return response.json();
   } catch (error: any) {
     clearTimeout(id);
