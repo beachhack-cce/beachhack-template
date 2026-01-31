@@ -113,6 +113,7 @@ if MCP_AVAILABLE:
         return [
             Tool(
                 name="check_node_health",
+                title="Check Node Health",
                 description="""Check if a specific node is healthy or showing anomalous behavior.
                 
 This compares the node's current behavior to its historical baseline.
@@ -132,6 +133,7 @@ A drift score > 2.0 indicates the node is behaving significantly differently fro
             ),
             Tool(
                 name="list_nodes",
+                title="List Nodes",
                 description="""List all registered nodes in the federated learning cluster.
 
 Returns information about each node including:
@@ -148,6 +150,7 @@ Returns information about each node including:
             ),
             Tool(
                 name="compare_nodes",
+                title="Compare Nodes",
                 description="""Compare the behavior of two nodes.
 
 Returns similarity metrics including:
@@ -173,6 +176,7 @@ Use this to check if two servers are behaving similarly.""",
             ),
             Tool(
                 name="get_cluster_status",
+                title="Get Cluster Status",
                 description="""Get overall health status of the federated learning cluster.
 
 Returns:
@@ -190,6 +194,7 @@ Good for a quick overview of fleet health.""",
             ),
             Tool(
                 name="get_outliers",
+                title="Get Outliers",
                 description="""Find nodes that are behaving abnormally compared to the cluster.
 
 Returns a list of nodes whose behavior significantly differs from the group.
@@ -207,6 +212,7 @@ Note: Requires at least 3 active nodes to detect cross-node outliers.""",
             ),
             Tool(
                 name="get_node_history",
+                title="Get Node History",
                 description="""Get the behavioral trend history for a specific node.
 
 Returns the last N embeddings stored for the node, useful for understanding
