@@ -408,38 +408,56 @@ async def main_stdio():
 
 
 def create_sse_app():
-    """Create Starlette app with SSE transport for network mode."""
+    """Create a raw ASGI app for MCP SSE transport."""
     sse = SseServerTransport("/messages")
     
-    async def handle_sse(request):
-        """Handle SSE connection - this is a streaming endpoint."""
-        async with sse.connect_sse(
-            request.scope, request.receive, request._send
-        ) as streams:
-            await server.run(
-                streams[0], streams[1], server.create_initialization_options()
-            )
-        # Return an empty response since SSE already handled the connection
-        from starlette.responses import Response
-        return Response(status_code=200)
+    async def app(scope, receive, send):
+        """Raw ASGI application handler."""
+        if scope["type"] != "http":
+            return
+        
+        path = scope["path"]
+        method = scope.get("method", "GET")
+        
+        # Health check endpoint
+        if path == "/health" and method == "GET":
+            await send({
+                "type": "http.response.start",
+                "status": 200,
+                "headers": [[b"content-type", b"application/json"]],
+            })
+            await send({
+                "type": "http.response.body",
+                "body": b'{"status": "ok", "server": "federated-mcp"}',
+            })
+            return
+        
+        # SSE connection endpoint
+        if path == "/sse" and method == "GET":
+            async with sse.connect_sse(scope, receive, send) as streams:
+                await server.run(
+                    streams[0], streams[1], server.create_initialization_options()
+                )
+            return
+        
+        # POST messages endpoint (for MCP messages)
+        if path.startswith("/messages") and method == "POST":
+            await sse.handle_post_message(scope, receive, send)
+            return
+        
+        # 404 for everything else
+        await send({
+            "type": "http.response.start",
+            "status": 404,
+            "headers": [[b"content-type", b"text/plain"]],
+        })
+        await send({
+            "type": "http.response.body",
+            "body": b"Not Found",
+        })
     
-    async def handle_messages(request):
-        """Handle POST messages to the SSE session."""
-        await sse.handle_post_message(request.scope, request.receive, request._send)
-        # Return an empty response since the transport handles it
-        from starlette.responses import Response
-        return Response(status_code=202)
-    
-    async def health(request):
-        return JSONResponse({"status": "ok", "server": "federated-mcp"})
-    
-    return Starlette(
-        routes=[
-            Route("/health", health),
-            Route("/sse", endpoint=handle_sse),
-            Route("/messages", endpoint=handle_messages, methods=["POST"]),
-        ]
-    )
+    return app
+
 
 
 
