@@ -11,6 +11,7 @@ import { discoverFiles } from './scanner/discover';
 import { tagFiles } from './scanner/classify';
 import { runAllRules } from './rules';
 import { rankFailures } from './scoring/score';
+import { computeDelta, saveLastRun } from './delta';
 import { printTop3, printBoxed } from './output/printer';
 
 const program = new Command();
@@ -31,7 +32,12 @@ program
     const tagged = tagFiles(filePaths, rootDir);
     const failures = runAllRules(tagged);
     const ranked = rankFailures(failures);
-    const output = opts.box !== false ? printBoxed(ranked) : printTop3(ranked);
+    const delta = computeDelta(rootDir, ranked);
+    saveLastRun(rootDir, ranked);
+    const output =
+      opts.box !== false
+        ? printBoxed(ranked, { delta })
+        : printTop3(ranked, { delta });
     console.log(output);
   });
 
