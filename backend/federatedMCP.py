@@ -42,6 +42,17 @@ except ImportError:
     MCP_AVAILABLE = False
     print("MCP SDK not available. Install with: pip install mcp")
 
+# SSE transport for network mode
+try:
+    from mcp.server.sse import SseServerTransport
+    from starlette.applications import Starlette
+    from starlette.routing import Route
+    from starlette.responses import JSONResponse
+    import uvicorn
+    SSE_AVAILABLE = True
+except ImportError:
+    SSE_AVAILABLE = False
+
 # HTTP client
 try:
     import httpx
@@ -385,22 +396,90 @@ Similarity: [{bar}] {sim:.1%}
 # MAIN
 # =============================================================================
 
-async def main():
-    """Run the MCP server."""
-    if not MCP_AVAILABLE:
-        print("MCP SDK not installed. Run: pip install mcp")
-        return
-    
-    if not HTTPX_AVAILABLE:
-        print("httpx not installed. Run: pip install httpx")
-        return
-    
-    print(f"Federated Learning MCP Server starting...")
+MCP_PORT = int(os.environ.get("MCP_PORT", "3001"))
+
+async def main_stdio():
+    """Run the MCP server in stdio mode (for local use)."""
+    print(f"Federated Learning MCP Server starting (stdio mode)...")
     print(f"Connected to: {FEDERATED_SERVER_URL}")
     
     async with stdio_server() as (read_stream, write_stream):
         await server.run(read_stream, write_stream, server.create_initialization_options())
 
 
+def create_sse_app():
+    """Create Starlette app with SSE transport for network mode."""
+    sse = SseServerTransport("/messages")
+    
+    async def handle_sse(request):
+        async with sse.connect_sse(
+            request.scope, request.receive, request._send
+        ) as streams:
+            await server.run(
+                streams[0], streams[1], server.create_initialization_options()
+            )
+    
+    async def handle_messages(request):
+        await sse.handle_post_message(request.scope, request.receive, request._send)
+    
+    async def health(request):
+        return JSONResponse({"status": "ok", "server": "federated-mcp"})
+    
+    return Starlette(
+        routes=[
+            Route("/health", health),
+            Route("/sse", handle_sse),
+            Route("/messages", handle_messages, methods=["POST"]),
+        ]
+    )
+
+
+def main():
+    """Entry point - supports both stdio and SSE modes."""
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='Federated Learning MCP Server')
+    parser.add_argument(
+        '--mode', choices=['stdio', 'sse'], default='sse',
+        help='Transport mode: stdio (local) or sse (network)'
+    )
+    parser.add_argument(
+        '--port', type=int, default=MCP_PORT,
+        help='Port for SSE mode (default: 3001)'
+    )
+    parser.add_argument(
+        '--host', type=str, default='0.0.0.0',
+        help='Host for SSE mode (default: 0.0.0.0)'
+    )
+    
+    args = parser.parse_args()
+    
+    if not MCP_AVAILABLE:
+        print("MCP SDK not installed. Run: pip install mcp")
+        return 1
+    
+    if not HTTPX_AVAILABLE:
+        print("httpx not installed. Run: pip install httpx")
+        return 1
+    
+    if args.mode == 'stdio':
+        asyncio.run(main_stdio())
+    else:
+        if not SSE_AVAILABLE:
+            print("SSE dependencies not installed. Run:")
+            print("  pip install starlette uvicorn")
+            return 1
+        
+        print(f"Federated Learning MCP Server starting (SSE mode)...")
+        print(f"Listening on http://{args.host}:{args.port}")
+        print(f"SSE endpoint: http://{args.host}:{args.port}/sse")
+        print(f"Connected to federated server: {FEDERATED_SERVER_URL}")
+        
+        app = create_sse_app()
+        uvicorn.run(app, host=args.host, port=args.port)
+    
+    return 0
+
+
 if __name__ == "__main__":
-    asyncio.run(main())
+    exit(main())
