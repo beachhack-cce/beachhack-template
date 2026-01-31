@@ -1,4 +1,3 @@
-// filepath: /home/abin/Documents/CodeBase/paper/app/dashboard/smartAnalytics/page.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -33,32 +32,78 @@ interface ClusterData {
   outlier_count: number;
 }
 
+function formatTimestamp(timestamp: string | number): string {
+  if (!timestamp) return "Unknown";
+  
+  const date = new Date(typeof timestamp === "number" ? timestamp * 1000 : timestamp);
+  
+  if (isNaN(date.getTime())) return String(timestamp);
+  
+  const day = date.getDate().toString().padStart(2, "0");
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
+  const year = date.getFullYear().toString().slice(-2);
+  const hours = date.getHours().toString().padStart(2, "0");
+  const minutes = date.getMinutes().toString().padStart(2, "0");
+
+  return `${day}/${month}/${year} ${hours}:${minutes}`;
+}
+
+function formatSampleCount(count: number): string {
+  if (!count && count !== 0) return "0";
+  
+  if (count >= 1000000) {
+    const millions = count / 1000000;
+    const rounded = Math.floor(millions * 2) / 2;
+    return `${rounded}M+`;
+  }
+  
+  return count.toLocaleString();
+}
+
 function SmartAnalytics() {
   const [compareMode, setCompareMode] = useState(false);
   const [selectedNodes, setSelectedNodes] = useState<string[]>([]);
   const [activeNode, setActiveNode] = useState<string | null>(null);
   const [showTrends, setShowTrends] = useState(false);
 
-  const { data: nodes, isLoading: nodesLoading } = trpc.analytics.getNodes.useQuery();
-  const { data: cluster } = trpc.analytics.getCluster.useQuery();
-  const { data: outliers } = trpc.analytics.getOutliers.useQuery();
-    const { data: nodeAnomaly } = trpc.analytics.getNodeAnomaly.useQuery(
+  const { data: nodes, isLoading: nodesLoading } = trpc.analytics.getNodes.useQuery(undefined, {
+    refetchInterval: 30000, 
+  });
+  const { data: cluster } = trpc.analytics.getCluster.useQuery(undefined, {
+    refetchInterval: 30000, 
+  });
+  const { data: outliers } = trpc.analytics.getOutliers.useQuery(undefined, {
+    refetchInterval: 30000, 
+  });
+  const { data: nodeAnomaly } = trpc.analytics.getNodeAnomaly.useQuery(
     { clientId: activeNode || "" },
-    { enabled: !!activeNode && showTrends }
+    { 
+      enabled: !!activeNode && showTrends,
+      refetchInterval: 10000, 
+    }
   );
   const { data: compareResult, isLoading: compareLoading } = trpc.analytics.compareNodes.useQuery(
     { id1: selectedNodes[0] || "", id2: selectedNodes[1] || "" },
-    { enabled: selectedNodes.length === 2 }
+    { 
+      enabled: selectedNodes.length === 2,
+      refetchInterval: 30000, 
+    }
   );
 
   const { data: nodeHistory, isLoading: historyLoading } = trpc.analytics.getNodeHistory.useQuery(
     { clientId: activeNode || "" },
-    { enabled: !!activeNode && showTrends }
+    { 
+      enabled: !!activeNode && showTrends,
+      refetchInterval: 10000, 
+    }
   );
 
   const { data: nodeDetails } = trpc.analytics.getNode.useQuery(
     { clientId: activeNode || "" },
-    { enabled: !!activeNode && showTrends }
+    { 
+      enabled: !!activeNode && showTrends,
+      refetchInterval: 10000,
+    }
   );
 
   const handleCardClick = (clientId: string) => {
@@ -133,7 +178,7 @@ function SmartAnalytics() {
             <StatCard label="Total Nodes" value={cluster.total_nodes} />
             <StatCard label="Active" value={cluster.active_nodes} color="text-green-400" />
             <StatCard label="Stale" value={cluster.stale_nodes} color="text-yellow-400" />
-            <StatCard label="Samples" value={cluster.total_samples?.toLocaleString()} />
+            <StatCard label="Samples" value={formatSampleCount(cluster.total_samples)} />
             <StatCard label="Avg Distance" value={cluster.avg_distance_from_centroid?.toFixed(2)} />
             <StatCard label="Outliers" value={cluster.outlier_count} color="text-red-400" />
           </div>
@@ -219,8 +264,8 @@ function SmartAnalytics() {
                   <h3 className="text-lg font-semibold text-white mb-4">Node Information</h3>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <InfoCard label="Client ID" value={nodeDetails.client_id} mono />
-                    <InfoCard label="Last Seen" value={nodeDetails.last_seen_human} />
-                    <InfoCard label="Samples" value={nodeDetails.num_samples?.toLocaleString()} />
+                    <InfoCard label="Last Seen" value={formatTimestamp(nodeDetails.last_seen)} />
+                    <InfoCard label="Samples" value={formatSampleCount(nodeDetails.num_samples)} />
                     <InfoCard label="Updates" value={nodeDetails.update_count} />
                     <InfoCard
                       label="Status"
@@ -250,7 +295,9 @@ function SmartAnalytics() {
                         className="p-4 bg-black/50 rounded-lg border border-gray-700"
                       >
                         <div className="flex justify-between items-center">
-                          <span className="text-gray-400 text-sm">{entry.timestamp || `Entry ${index + 1}`}</span>
+                          <span className="text-gray-400 text-sm">
+                            {entry.timestamp ? formatTimestamp(entry.timestamp) : `Entry ${index + 1}`}
+                          </span>
                           <span className="text-emerald-400 font-mono text-sm">
                             {entry.value || JSON.stringify(entry).slice(0, 50)}...
                           </span>
@@ -294,7 +341,10 @@ function NodeCard({
 }) {
   const { data: nodeAnomaly } = trpc.analytics.getNodeAnomaly.useQuery(
     { clientId: node.client_id },
-    { staleTime: 30000 }
+    { 
+      staleTime: 30000,
+      refetchInterval: 40000, 
+    }
   );
 
   const getAnomalyColor = (status: string, isAnomalous: boolean) => {
@@ -327,7 +377,7 @@ function NodeCard({
       <div className="grid grid-cols-2 gap-4 mb-4">
         <div>
           <p className="text-xs text-gray-400">Samples</p>
-          <p className="text-lg font-semibold text-white">{node.num_samples?.toLocaleString()}</p>
+          <p className="text-lg font-semibold text-white">{formatSampleCount(node.num_samples)}</p>
         </div>
         <div>
           <p className="text-xs text-gray-400">Updates</p>
@@ -337,7 +387,7 @@ function NodeCard({
 
       <div className="mb-4">
         <p className="text-xs text-gray-400">Last Seen</p>
-        <p className="text-sm text-white">{node.last_seen_human}</p>
+        <p className="text-sm text-white">{formatTimestamp(node.last_seen)}</p>
       </div>
 
       <div className="flex justify-between items-center pt-4 border-t border-gray-700">
