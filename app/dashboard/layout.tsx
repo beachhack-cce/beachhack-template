@@ -6,12 +6,23 @@ import {
 } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import { AIChatWidget } from "./components/ai-chat-widget";
+import { auth } from '@/lib/auth';
+import { redirect } from 'next/navigation';
+import { headers } from 'next/headers';
 
-function layout({
+export default async function layout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const authSession = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!authSession?.user) {
+    redirect("/login");
+  }
+
   return (
     <SidebarProvider
       style={
@@ -21,7 +32,7 @@ function layout({
         } as React.CSSProperties
       }
     >
-      <AppSidebar variant="inset" className="bg-green-900 rounded-lg" />
+      <AppSidebar user={authSession.user} />
       <SidebarInset className="bg-black text-white min-h-screen">
         <SiteHeader />
         {children}
@@ -30,5 +41,3 @@ function layout({
     </SidebarProvider>
   )
 }
-
-export default layout

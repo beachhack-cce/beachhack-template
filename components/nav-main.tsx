@@ -24,19 +24,19 @@ export function NavMain({
     <SidebarGroup>
       <SidebarGroupContent className="flex flex-col mt-5 gap-2">
         <SidebarMenu>
-         
+
         </SidebarMenu>
         <SidebarMenu>
           {items.map((item) => (
             <SidebarMenuItem className="text-4xl mb-2" key={item.title}>
               <Link href={item.url}>
-              <SidebarMenuButton tooltip={item.title}>
-                {item.icon && <item.icon className="\!w-6 \!h-6"/>}
-                <span className="text-2xl font-semibold">{item.title}</span>
-              </SidebarMenuButton>
+                <SidebarMenuButton tooltip={item.title} className="cursor-pointer">
+                  {item.icon && <item.icon className="w-6! h-6!" />}
+                  <span className="text-2xl font-semibold">{item.title}</span>
+                </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
-            
+
           ))}
         </SidebarMenu>
       </SidebarGroupContent>

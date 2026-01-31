@@ -1,6 +1,5 @@
 "use client"
 
-import * as React from "react"
 import {
   IconCamera,
   IconChartBar,
@@ -10,17 +9,14 @@ import {
   IconFileDescription,
   IconFileWord,
   IconFolder,
-  IconHelp,
-  IconInnerShadowTop,
   IconListDetails,
   IconReport,
-  IconSearch,
-  IconSettings,
   IconUsers,
   IconServer,
   IconShieldExclamation,
-  IconNotebook,
+  IconSearch
 } from "@tabler/icons-react"
+import { Rocket } from "lucide-react"
 import { NavMain } from "@/components/nav-main"
 import { NavUser } from "@/components/nav-user"
 import {
@@ -66,7 +62,7 @@ const routes = {
       title: "Agent",
       url: "/dashboard/agent",
       icon: IconUsers,
-    },  
+    },
     {
       title: "Reports",
       url: "/dashboard/reports",
@@ -87,7 +83,7 @@ const routes = {
       items: [
         {
           title: "Active Proposals",
-          url: "#",IconFolder
+          url: "#", IconFolder
         },
         {
           title: "Archived",
@@ -146,28 +142,20 @@ const routes = {
   ],
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const {
-    data: session,
-  } = authClient.useSession();
-  
-  if(!session){
-    return null;
-  }
-  
+export function AppSidebar({ user }: { user: any }) {
   return (
-    <Sidebar collapsible="offcanvas" {...props} >
+    <Sidebar collapsible="offcanvas"  >
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
-              className="data-[slot=sidebar-menu-button]:\!p-1.5 "
+              className="data-[slot=sidebar-menu-button]:\!p-1.5"
             >
-              <a href="#">
-                <IconNotebook className="\!h-7 \!w-7" size={40} />   
-                <span className="text-3xl font-bold">Paper </span>
-              </a>
+              <div className="flex justify-center">
+                <Rocket className="w-8! h-8!" />
+                <span className="text-4xl! font-extrabold">PaPeR.Ai</span>
+              </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -176,7 +164,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain items={routes.navMain} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={{ ...session.user, image: session.user.image ?? null }} />
+        <NavUser user={{ ...user, image: user.image ?? null }} />
       </SidebarFooter>
     </Sidebar>
   )
