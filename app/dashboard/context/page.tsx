@@ -1,14 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Globe, Sparkles, RefreshCw, CheckCircle } from "lucide-react";
+import { Loader2, Globe, Sparkles, RefreshCw, CheckCircle, Edit2, Save, X } from "lucide-react";
 import { trpc } from "@/trpc/client";
 import { toast } from "sonner";
+import { authClient } from "@/lib/auth-client";
 
 interface WebsiteInfo {
   name: string;
@@ -23,6 +24,8 @@ interface WebsiteInfo {
 
 export default function ContextPage() {
   const [url, setUrl] = useState("");
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [hasExistingContext, setHasExistingContext] = useState(false);
   const [websiteInfo, setWebsiteInfo] = useState<WebsiteInfo>({
     name: "",
     description: "",
@@ -34,6 +37,36 @@ export default function ContextPage() {
     socialLinks: "",
   });
 
+  const { data: session } = authClient.useSession();
+  const userId = session?.user?.id;
+
+  // Fetch existing context
+  const { data: existingContext, isLoading: isLoadingContext, refetch } = trpc.context.get.useQuery(
+    { userId: userId || "" },
+    { enabled: !!userId }
+  );
+
+  // Load existing context into form
+  useEffect(() => {
+    if (existingContext) {
+      setHasExistingContext(true);
+      setIsEditMode(false);
+      setWebsiteInfo({
+        name: existingContext.name || "",
+        description: existingContext.description || "",
+        industry: existingContext.industry || "",
+        services: existingContext.services || "",
+        contactEmail: existingContext.contactEmail || "",
+        phone: existingContext.phone || "",
+        address: existingContext.address || "",
+        socialLinks: existingContext.socialLinks || "",
+      });
+    } else {
+      setHasExistingContext(false);
+      setIsEditMode(true); // Allow editing if no context exists
+    }
+  }, [existingContext]);
+
   const analyzeMutation = trpc.website.analyze.useMutation({
     onSuccess: (data) => {
       setWebsiteInfo(data);
@@ -44,9 +77,12 @@ export default function ContextPage() {
     },
   });
 
-  const saveContextMutation = trpc.website.saveContext.useMutation({
+  const saveContextMutation = trpc.context.upsert.useMutation({
     onSuccess: () => {
-      toast.success("Context saved successfully!");
+      toast.success(hasExistingContext ? "Context updated successfully!" : "Context saved successfully!");
+      setHasExistingContext(true);
+      setIsEditMode(false);
+      refetch();
     },
     onError: (error) => {
       toast.error(error.message || "Failed to save context");
@@ -66,11 +102,51 @@ export default function ContextPage() {
   };
 
   const handleSave = () => {
-    saveContextMutation.mutate({ url, ...websiteInfo });
+    if (!userId) {
+      toast.error("You must be logged in to save context");
+      return;
+    }
+    
+    saveContextMutation.mutate({
+      userId,
+      name: websiteInfo.name,
+      description: websiteInfo.description,
+      industry: websiteInfo.industry,
+      services: websiteInfo.services,
+      contactEmail: websiteInfo.contactEmail,
+      phone: websiteInfo.phone,
+      address: websiteInfo.address,
+      socialLinks: websiteInfo.socialLinks,
+    });
+  };
+
+  const handleCancelEdit = () => {
+    if (existingContext) {
+      setWebsiteInfo({
+        name: existingContext.name || "",
+        description: existingContext.description || "",
+        industry: existingContext.industry || "",
+        services: existingContext.services || "",
+        contactEmail: existingContext.contactEmail || "",
+        phone: existingContext.phone || "",
+        address: existingContext.address || "",
+        socialLinks: existingContext.socialLinks || "",
+      });
+    }
+    setIsEditMode(false);
   };
 
   const isAnalyzing = analyzeMutation.isPending;
   const isSaving = saveContextMutation.isPending;
+  const isDisabled = !isEditMode || isAnalyzing;
+
+  if (isLoadingContext) {
+    return (
+      <div className="min-h-screen bg-linear-to-br from-black via-green-950/80 to-black flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-green-400" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-linear-to-br from-black via-green-950/80 to-black p-4 md:p-8">
@@ -80,73 +156,113 @@ export default function ContextPage() {
             <span className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-green-500/20 border border-green-500/30 shadow-lg shadow-green-500/10">
               <Globe className="h-5 w-5 text-green-400" />
             </span>
-            <span><span className="text-green-400">Context</span> Creation</span>
+            <span><span className="text-green-400">Context</span> {hasExistingContext ? "Management" : "Creation"}</span>
           </h1>
           <p className="text-gray-400 ml-13">
-            Enter a website URL to automatically extract business or portfolio information using AI.
+            {hasExistingContext 
+              ? "Your business context is saved. Click Edit to make changes."
+              : "Enter a website URL to automatically extract business or portfolio information using AI."
+            }
           </p>
         </div>
 
-        <Card className="mb-6 bg-black/50 backdrop-blur-sm border-green-500/20 shadow-lg shadow-green-500/5">
-          <CardHeader className="border-b border-green-500/10">
-            <CardTitle className="flex items-center gap-2 text-white">
-              <Globe className="h-5 w-5 text-green-400" />
-              Website URL
-            </CardTitle>
-            <CardDescription className="text-gray-400">
-              Enter the website URL you want to analyze
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Input
-                type="url"
-                placeholder="https://example.com"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                className="flex-1 bg-black/60 border-green-500/30 text-white placeholder:text-gray-500 focus:border-green-400 focus:ring-green-400/20"
-                disabled={isAnalyzing}
-              />
-              <Button 
-                onClick={analyzeWebsite} 
-                disabled={isAnalyzing || !url}
-                className="bg-green-600 hover:bg-green-500 text-white border-0 shadow-lg shadow-green-500/20 transition-all duration-200 hover:shadow-green-500/40"
-              >
-                {isAnalyzing ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Analyzing...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="mr-2 h-4 w-4" />
-                    Analyze with AI
-                  </>
-                )}
-              </Button>
+        {/* Success Banner when context exists */}
+        {hasExistingContext && !isEditMode && (
+          <div className="mb-6 p-4 bg-green-500/10 border border-green-500/30 rounded-xl flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <CheckCircle className="h-5 w-5 text-green-400" />
+              <span className="text-green-400 font-medium">Context saved successfully!</span>
             </div>
-          </CardContent>
-        </Card>
+            <Button
+              onClick={() => setIsEditMode(true)}
+              variant="outline"
+              size="sm"
+              className="border-green-500/30 text-green-400 hover:bg-green-500/10 hover:text-green-300 hover:border-green-400"
+            >
+              <Edit2 className="mr-2 h-4 w-4" />
+              Edit Context
+            </Button>
+          </div>
+        )}
+
+        {/* URL Analysis Card - only show if editing or no existing context */}
+        {(isEditMode || !hasExistingContext) && (
+          <Card className="mb-6 bg-black/50 backdrop-blur-sm border-green-500/20 shadow-lg shadow-green-500/5">
+            <CardHeader className="border-b border-green-500/10">
+              <CardTitle className="flex items-center gap-2 text-white">
+                <Globe className="h-5 w-5 text-green-400" />
+                Website URL
+              </CardTitle>
+              <CardDescription className="text-gray-400">
+                Enter the website URL you want to analyze
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Input
+                  type="url"
+                  placeholder="https://example.com"
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  className="flex-1 bg-black/60 border-green-500/30 text-white placeholder:text-gray-500 focus:border-green-400 focus:ring-green-400/20"
+                  disabled={isAnalyzing}
+                />
+                <Button 
+                  onClick={analyzeWebsite} 
+                  disabled={isAnalyzing || !url}
+                  className="bg-green-600 hover:bg-green-500 text-white border-0 shadow-lg shadow-green-500/20 transition-all duration-200 hover:shadow-green-500/40"
+                >
+                  {isAnalyzing ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Analyzing...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="mr-2 h-4 w-4" />
+                      Analyze with AI
+                    </>
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <Card className="bg-black/80 backdrop-blur-sm border-green-500/20 shadow-lg shadow-green-500/5">
           <CardHeader className="border-b border-green-500/10">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-white">Extracted <span className="text-green-400">Information</span></CardTitle>
+                <CardTitle className="text-white">
+                  {hasExistingContext ? "Saved" : "Extracted"} <span className="text-green-400">Information</span>
+                </CardTitle>
                 <CardDescription className="text-gray-400">
-                  Review and edit the automatically extracted information
+                  {isEditMode 
+                    ? "Edit your business context information below"
+                    : "Your saved business context information"
+                  }
                 </CardDescription>
               </div>
-              {websiteInfo.name && (
+              {hasExistingContext && !isEditMode && (
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  onClick={analyzeWebsite} 
-                  disabled={isAnalyzing}
+                  onClick={() => setIsEditMode(true)}
                   className="border-green-500/30 text-green-400 hover:bg-green-500/10 hover:text-green-300 hover:border-green-400"
                 >
-                  <RefreshCw className={`mr-2 h-4 w-4 ${isAnalyzing ? "animate-spin" : ""}`} />
-                  Re-analyze
+                  <Edit2 className="mr-2 h-4 w-4" />
+                  Edit
+                </Button>
+              )}
+              {isEditMode && hasExistingContext && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleCancelEdit}
+                  className="border-red-500/30 text-red-400 hover:bg-red-500/10 hover:text-red-300 hover:border-red-400"
+                >
+                  <X className="mr-2 h-4 w-4" />
+                  Cancel
                 </Button>
               )}
             </div>
@@ -161,8 +277,8 @@ export default function ContextPage() {
                 placeholder="Enter business or portfolio name"
                 value={websiteInfo.name}
                 onChange={(e) => handleInputChange("name", e.target.value)}
-                disabled={isAnalyzing}
-                className="bg-black/60 border-green-500/30 text-white placeholder:text-gray-500 focus:border-green-400 focus:ring-green-400/20"
+                disabled={isDisabled}
+                className={`bg-black/60 border-green-500/30 text-white placeholder:text-gray-500 focus:border-green-400 focus:ring-green-400/20 ${!isEditMode ? "opacity-70" : ""}`}
               />
             </div>
 
@@ -176,8 +292,8 @@ export default function ContextPage() {
                 value={websiteInfo.description}
                 onChange={(e) => handleInputChange("description", e.target.value)}
                 rows={4}
-                disabled={isAnalyzing}
-                className="bg-black/60 border-green-500/30 text-white placeholder:text-gray-500 focus:border-green-400 focus:ring-green-400/20 resize-none"
+                disabled={isDisabled}
+                className={`bg-black/60 border-green-500/30 text-white placeholder:text-gray-500 focus:border-green-400 focus:ring-green-400/20 resize-none ${!isEditMode ? "opacity-70" : ""}`}
               />
             </div>
 
@@ -190,8 +306,8 @@ export default function ContextPage() {
                 placeholder="e.g., Technology, Healthcare, Design"
                 value={websiteInfo.industry}
                 onChange={(e) => handleInputChange("industry", e.target.value)}
-                disabled={isAnalyzing}
-                className="bg-black/60 border-green-500/30 text-white placeholder:text-gray-500 focus:border-green-400 focus:ring-green-400/20"
+                disabled={isDisabled}
+                className={`bg-black/60 border-green-500/30 text-white placeholder:text-gray-500 focus:border-green-400 focus:ring-green-400/20 ${!isEditMode ? "opacity-70" : ""}`}
               />
             </div>
 
@@ -205,8 +321,8 @@ export default function ContextPage() {
                 value={websiteInfo.services}
                 onChange={(e) => handleInputChange("services", e.target.value)}
                 rows={3}
-                disabled={isAnalyzing}
-                className="bg-black/60 border-green-500/30 text-white placeholder:text-gray-500 focus:border-green-400 focus:ring-green-400/20 resize-none"
+                disabled={isDisabled}
+                className={`bg-black/60 border-green-500/30 text-white placeholder:text-gray-500 focus:border-green-400 focus:ring-green-400/20 resize-none ${!isEditMode ? "opacity-70" : ""}`}
               />
             </div>
 
@@ -221,8 +337,8 @@ export default function ContextPage() {
                   placeholder="contact@example.com"
                   value={websiteInfo.contactEmail}
                   onChange={(e) => handleInputChange("contactEmail", e.target.value)}
-                  disabled={isAnalyzing}
-                  className="bg-black/60 border-green-500/30 text-white placeholder:text-gray-500 focus:border-green-400 focus:ring-green-400/20"
+                  disabled={isDisabled}
+                  className={`bg-black/60 border-green-500/30 text-white placeholder:text-gray-500 focus:border-green-400 focus:ring-green-400/20 ${!isEditMode ? "opacity-70" : ""}`}
                 />
               </div>
 
@@ -236,8 +352,8 @@ export default function ContextPage() {
                   placeholder="+1 (555) 123-4567"
                   value={websiteInfo.phone}
                   onChange={(e) => handleInputChange("phone", e.target.value)}
-                  disabled={isAnalyzing}
-                  className="bg-black/60 border-green-500/30 text-white placeholder:text-gray-500 focus:border-green-400 focus:ring-green-400/20"
+                  disabled={isDisabled}
+                  className={`bg-black/60 border-green-500/30 text-white placeholder:text-gray-500 focus:border-green-400 focus:ring-green-400/20 ${!isEditMode ? "opacity-70" : ""}`}
                 />
               </div>
             </div>
@@ -251,8 +367,8 @@ export default function ContextPage() {
                 placeholder="Business address"
                 value={websiteInfo.address}
                 onChange={(e) => handleInputChange("address", e.target.value)}
-                disabled={isAnalyzing}
-                className="bg-black/60 border-green-500/30 text-white placeholder:text-gray-500 focus:border-green-400 focus:ring-green-400/20"
+                disabled={isDisabled}
+                className={`bg-black/60 border-green-500/30 text-white placeholder:text-gray-500 focus:border-green-400 focus:ring-green-400/20 ${!isEditMode ? "opacity-70" : ""}`}
               />
             </div>
 
@@ -266,33 +382,46 @@ export default function ContextPage() {
                 value={websiteInfo.socialLinks}
                 onChange={(e) => handleInputChange("socialLinks", e.target.value)}
                 rows={3}
-                disabled={isAnalyzing}
-                className="bg-black/60 border-green-500/30 text-white placeholder:text-gray-500 focus:border-green-400 focus:ring-green-400/20 resize-none"
+                disabled={isDisabled}
+                className={`bg-black/60 border-green-500/30 text-white placeholder:text-gray-500 focus:border-green-400 focus:ring-green-400/20 resize-none ${!isEditMode ? "opacity-70" : ""}`}
               />
             </div>
 
-            <div className="border-t border-green-500/10 pt-6">
-              <div className="flex justify-end">
-                <Button 
-                  onClick={handleSave} 
-                  size="lg" 
-                  disabled={isSaving || isAnalyzing || !url}
-                  className="bg-green-600 hover:bg-green-500 text-white border-0 shadow-lg shadow-green-500/20 transition-all duration-200 hover:shadow-green-500/40 disabled:bg-gray-800 disabled:text-gray-500 disabled:shadow-none"
-                >
-                  {isSaving ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Saving...
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle className="mr-2 h-4 w-4" />
-                      Save Context Information
-                    </>
+            {isEditMode && (
+              <div className="border-t border-green-500/10 pt-6">
+                <div className="flex justify-end gap-3">
+                  {hasExistingContext && (
+                    <Button 
+                      onClick={handleCancelEdit}
+                      variant="outline"
+                      size="lg"
+                      className="border-gray-600 text-gray-400 hover:bg-gray-800 hover:text-white"
+                    >
+                      <X className="mr-2 h-4 w-4" />
+                      Cancel
+                    </Button>
                   )}
-                </Button>
+                  <Button 
+                    onClick={handleSave} 
+                    size="lg" 
+                    disabled={isSaving || isAnalyzing}
+                    className="bg-green-600 hover:bg-green-500 text-white border-0 shadow-lg shadow-green-500/20 transition-all duration-200 hover:shadow-green-500/40 disabled:bg-gray-800 disabled:text-gray-500 disabled:shadow-none"
+                  >
+                    {isSaving ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="mr-2 h-4 w-4" />
+                        {hasExistingContext ? "Update Context" : "Save Context"}
+                      </>
+                    )}
+                  </Button>
+                </div>
               </div>
-            </div>
+            )}
           </CardContent>
         </Card>
       </div>
