@@ -8,6 +8,8 @@ set -e
 # Configuration
 SCRIPT_URL="https://raw.githubusercontent.com/aibelbin/paper/main/client-toolkit/main.py"
 FEDERATED_SCRIPT_URL="https://raw.githubusercontent.com/aibelbin/paper/main/client-toolkit/federatedClient.py"
+PYPROJECT_URL="https://raw.githubusercontent.com/aibelbin/paper/main/client-toolkit/pyproject.toml"
+PYTHON_VERSION_URL="https://raw.githubusercontent.com/aibelbin/paper/main/client-toolkit/.python-version"
 INSTALL_DIR="/opt/paper-monitor"
 SERVICE_NAME="paper-monitor"
 PYTHON_SCRIPT="main.py"
@@ -62,8 +64,8 @@ if [ -z "$SYSTEM_ID" ]; then
     exit 1
 fi
 
-# Check for required commands
-for cmd in curl python3 pip3 systemctl; do
+# Check for required commands (uv will be installed if missing)
+for cmd in curl systemctl; do
     if ! command -v $cmd &> /dev/null; then
         log_error "$cmd is required but not installed"
         exit 1
@@ -72,11 +74,23 @@ done
 
 log_info "Starting Paper Resource Monitor installation..."
 
+# Install uv if not present
+if ! command -v uv &> /dev/null; then
+    log_info "uv not found. Installing..."
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+    source $HOME/.cargo/env
+else
+    log_info "uv is already installed"
+fi
+
+# Ensure uv is in PATH
+export PATH="$HOME/.cargo/bin:$PATH"
+
 # Create installation directory
 log_info "Creating installation directory: $INSTALL_DIR"
 mkdir -p "$INSTALL_DIR"
 
-# Download the Python scripts
+# Download the Python scripts and config files
 log_info "Downloading monitoring script from $SCRIPT_URL"
 if curl -fsSL "$SCRIPT_URL" -o "$INSTALL_DIR/$PYTHON_SCRIPT"; then
     log_info "Main script downloaded successfully"
@@ -93,13 +107,31 @@ else
     exit 1
 fi
 
+log_info "Downloading pyproject.toml..."
+if curl -fsSL "$PYPROJECT_URL" -o "$INSTALL_DIR/pyproject.toml"; then
+    log_info "pyproject.toml downloaded successfully"
+else
+    log_error "Failed to download pyproject.toml"
+    exit 1
+fi
+
+log_info "Downloading .python-version..."
+if curl -fsSL "$PYTHON_VERSION_URL" -o "$INSTALL_DIR/.python-version"; then
+    log_info ".python-version downloaded successfully"
+else
+    log_error "Failed to download .python-version"
+    exit 1
+fi
+
 # Make the scripts executable
 chmod +x "$INSTALL_DIR/$PYTHON_SCRIPT"
 chmod +x "$INSTALL_DIR/$FEDERATED_SCRIPT"
 
-# Install Python dependencies
-log_info "Installing Python dependencies..."
-pip3 install --quiet requests psutil numpy
+# Install Python dependencies using uv
+log_info "Installing Python dependencies with uv..."
+cd "$INSTALL_DIR"
+uv sync
+cd - > /dev/null
 
 # Install Wazuh Agent
 log_info "Installing VPS Agent..."
@@ -140,10 +172,9 @@ cat > "$CONFIG_FILE" << EOF
 EOF
 log_info "Config file created with provided values"
 
-
-
 # Create systemd service file
 log_info "Creating systemd service..."
+UV_PATH=$(which uv)
 cat > "/etc/systemd/system/${SERVICE_NAME}.service" << EOF
 [Unit]
 Description=Paper Resource Monitor Service
@@ -155,7 +186,7 @@ StartLimitIntervalSec=0
 Type=simple
 User=root
 WorkingDirectory=$INSTALL_DIR
-ExecStart=/usr/bin/python3 $INSTALL_DIR/$PYTHON_SCRIPT
+ExecStart=$UV_PATH run $PYTHON_SCRIPT
 Restart=always
 RestartSec=10
 StandardOutput=journal
@@ -163,6 +194,7 @@ StandardError=journal
 
 # Environment variables (optional)
 Environment="HOME=/root"
+Environment="PATH=$HOME/.cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
 [Install]
 WantedBy=multi-user.target
