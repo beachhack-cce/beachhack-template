@@ -5,7 +5,7 @@ import MetricsChart, { type HistoryPoint } from "../components/MetricsChart/Metr
 import type { Provider } from "../types/provider";
 import { fetchServers } from "../api/servers";
 import { enableProvider, disableProvider, resetCircuitBreaker } from "../api/admin";
-import { serverToProvider } from "../utils/serverToProvider";
+import { serverToProvider, registryToProviders } from "../utils/serverToProvider";
 import styles from "./Home.module.css";
 
 const MAX_HISTORY = 40;
@@ -18,7 +18,9 @@ const Home: React.FC = () => {
     refetchIntervalInBackground: true,
   });
 
-  const providers: Provider[] = data?.servers?.map(serverToProvider) ?? [];
+  const providers: Provider[] = data?.provider_registry
+    ? registryToProviders(data.provider_registry)
+    : data?.servers?.map(serverToProvider) ?? [];
   const sortedProviders = [...providers].sort((a, b) => a.name.localeCompare(b.name));
   const [history, setHistory] = useState<HistoryPoint[]>([]);
   const lastTimestamp = useRef<string | null>(null);
@@ -45,13 +47,15 @@ const Home: React.FC = () => {
   };
 
   useEffect(() => {
-    if (!data?.timestamp || !data?.servers?.length) return;
+    const currentProviders = data?.provider_registry
+      ? registryToProviders(data.provider_registry)
+      : data?.servers?.map(serverToProvider) ?? [];
+    if (!data?.timestamp || !currentProviders.length) return;
     if (lastTimestamp.current === data.timestamp) return;
     lastTimestamp.current = data.timestamp;
-    const current = data.servers.map(serverToProvider);
     const point: HistoryPoint = {
       timestamp: data.timestamp,
-      providers: current.map((p) => ({
+      providers: currentProviders.map((p) => ({
         name: p.name,
         score: p.score,
         latency: p.latency,

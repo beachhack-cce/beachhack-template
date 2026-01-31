@@ -13,7 +13,7 @@ export const fetchServers = async (): Promise<ServersResponse> => {
     throw new Error(`Metrics error: ${res.status} ${res.statusText}`);
   }
   const data = await res.json();
-  if (data?.servers === undefined) {
+  if (data?.servers === undefined && !data?.provider_registry) {
     throw new Error("Invalid metrics response");
   }
   return data as ServersResponse;
