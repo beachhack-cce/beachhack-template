@@ -30,7 +30,7 @@ Codebase <br>
 	&nbsp;&nbsp;&nbsp;&nbsp;
 &nbsp;&nbsp;&nbsp;&nbsp;
 &nbsp;&nbsp;&nbsp;↓
- <br>&nbsp;&nbsp;&nbsp;Report (Top 3) <br>
+ <br>&nbsp;&nbsp;&nbsp;Report (Top 10) <br>
 
 
 ---
@@ -73,7 +73,7 @@ This is **rule-based**, not probabilistic.
 ### 4. Ranking Engine
 - Aggregates failure impact
 - Forces prioritization
-- Outputs **only the top 3**
+- Outputs **only the top 10**
 
 No configurable thresholds.
 No long tail.
