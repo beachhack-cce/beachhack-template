@@ -18,3 +18,8 @@ traces/
 data-n-sensor/*.json
 data-n-sensor/*.csv
 
+.DS_Store
+
+sensor_packets.json
+simulated_assets.csv
+extracted_features.json
