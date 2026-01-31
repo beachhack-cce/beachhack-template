@@ -14,6 +14,10 @@ import { applyFix } from './fixer';
 import { exec } from 'child_process';
 import util from 'util';
 import os from 'os';
+import { initIdentity, getCurrentUserEmail } from './identity';
+import { initDB, saveScanResults, createProject } from './db';
+import { createJiraIssue } from './integrations/jira';
+import { createClickUpTask } from './integrations/clickup';
 
 const execPromise = util.promisify(exec);
 
@@ -38,11 +42,64 @@ program
   .version('1.0.0');
 
 program
+  .command('init')
+  .description('Initialize ZeroHour identity')
+  .action(async () => {
+    await initIdentity();
+  });
+
+program
+  .command('project')
+  .description('Manage projects')
+  .argument('<action>', 'Action to perform (create)')
+  .argument('<name>', 'Project name')
+  .action(async (action, name) => {
+    if (action === 'create') {
+      let userEmail;
+      try {
+        userEmail = getCurrentUserEmail();
+      } catch (e: any) {
+        console.error(e.message);
+        process.exit(1);
+      }
+      
+      await initDB();
+      await createProject(name, userEmail);
+    } else {
+      console.log(chalk.red(`Unknown action: ${action}`));
+      console.log('Available actions: create');
+    }
+  });
+
+program
+  .command('config')
+  .description('Configure integrations (Jira, ClickUp)')
+  .argument('<integration>', 'Integration to configure (jira, clickup)')
+  .action(async (integration) => {
+    if (integration === 'jira') {
+      await configureJira();
+    } else if (integration === 'clickup') {
+      await configureClickUp();
+    } else {
+      console.log(chalk.red(`Unknown integration: ${integration}`));
+      console.log('Available integrations: jira, clickup');
+    }
+  });
+
+program
   .command('scan')
   .description('Run Semgrep scan and analyze results immediately')
   .argument('[directory]', 'Directory to scan', '.')
-  .action(async (directory) => {
+  .option('--project <name>', 'Project name')
+  .option('--create-jira', 'Create Jira issues')
+  .option('--create-clickup', 'Create ClickUp tasks')
+  .action(async (directory, options) => {
     printWelcome();
+    
+    // Default project name to directory name if not provided
+    if (!options.project) {
+        options.project = path.basename(path.resolve(directory));
+    }
     
     // Check for Semgrep
     spinner.start('Checking dependencies...');
@@ -83,7 +140,7 @@ program
       spinner.succeed(`Scan complete. Results saved to ${findingsFile}`);
       
       // Auto-trigger analyze
-      await runAnalysis(findingsFile);
+      await runAnalysis(findingsFile, options);
 
     } catch (e: any) {
       spinner.fail('Semgrep scan failed');
@@ -97,12 +154,145 @@ program
   .alias('analyse')
   .description('Prioritize risks from an existing findings.json file')
   .argument('[file]', 'Path to findings.json', 'findings.json')
-  .action(async (file) => {
+  .option('--project <name>', 'Project name')
+  .option('--create-jira', 'Create Jira issues')
+  .option('--create-clickup', 'Create ClickUp tasks')
+  .action(async (file, options) => {
     printWelcome();
-await runAnalysis(path.join(process.cwd(), file.replace(/\.\.\//g, '').replace(/\//g, '')));
+    // Default project name to current folder name if not provided
+    if (!options.project) {
+        options.project = path.basename(process.cwd());
+    }
+
+    await runAnalysis(
+      path.join(process.cwd(), file.replace(/\.\.\//g, '').replace(/\//g, '')), 
+      options
+    );
   });
 
-async function runAnalysis(filePath: string) {
+async function configureJira() {
+  console.log(chalk.blue('--- Jira Configuration Setup ---'));
+  
+  const answers = await inquirer.prompt([
+    {
+      type: 'input',
+      name: 'domain',
+      message: 'Jira Domain (e.g., company.atlassian.net):',
+      validate: (input) => input ? true : 'Domain is required'
+    },
+    {
+      type: 'input',
+      name: 'email',
+      message: 'Jira Email:',
+      validate: (input) => input ? true : 'Email is required'
+    },
+    {
+      type: 'password',
+      name: 'apiToken',
+      message: 'Jira API Token:',
+      mask: '*',
+      validate: (input) => input ? true : 'API Token is required'
+    },
+    {
+      type: 'input',
+      name: 'projectKey',
+      message: 'Jira Project Key (e.g., KAN, PROJ):',
+      validate: (input) => input ? true : 'Project Key is required'
+    }
+  ]);
+
+  const configContent = `
+JIRA_DOMAIN=${answers.domain}
+JIRA_EMAIL=${answers.email}
+JIRA_API_TOKEN=${answers.apiToken}
+JIRA_PROJECT_KEY=${answers.projectKey}
+`;
+
+  // Ask where to save
+  const { saveLocation } = await inquirer.prompt([{
+    type: 'list',
+    name: 'saveLocation',
+    message: 'Where should we save this configuration?',
+    choices: [
+      { name: 'Global (~/.zerohour/.env) - Recommended', value: 'global' },
+      { name: 'Local (.env) - Only for this project', value: 'local' }
+    ]
+  }]);
+
+  if (saveLocation === 'global') {
+    const globalDir = path.resolve(os.homedir(), '.zerohour');
+    if (!fs.existsSync(globalDir)) fs.mkdirSync(globalDir, { recursive: true });
+    const globalEnvPath = path.join(globalDir, '.env');
+    fs.appendFileSync(globalEnvPath, configContent);
+    console.log(chalk.green(`✅ Jira configuration saved globally to ${globalEnvPath}`));
+  } else {
+    const envPath = path.resolve(process.cwd(), '.env');
+    fs.appendFileSync(envPath, configContent);
+    console.log(chalk.green('✅ Jira configuration saved to local .env'));
+  }
+}
+
+async function configureClickUp() {
+  console.log(chalk.magenta('--- ClickUp Configuration Setup ---'));
+  
+  const answers = await inquirer.prompt([
+    {
+      type: 'password',
+      name: 'apiToken',
+      message: 'ClickUp API Token (pk_...):',
+      mask: '*',
+      validate: (input) => input ? true : 'API Token is required'
+    },
+    {
+      type: 'input',
+      name: 'listId',
+      message: 'ClickUp List ID (e.g., 12345678):',
+      validate: (input) => input ? true : 'List ID is required'
+    }
+  ]);
+
+  const configContent = `
+CLICKUP_API_TOKEN=${answers.apiToken}
+CLICKUP_LIST_ID=${answers.listId}
+`;
+
+  // Ask where to save
+  const { saveLocation } = await inquirer.prompt([{
+    type: 'list',
+    name: 'saveLocation',
+    message: 'Where should we save this configuration?',
+    choices: [
+      { name: 'Global (~/.zerohour/.env) - Recommended', value: 'global' },
+      { name: 'Local (.env) - Only for this project', value: 'local' }
+    ]
+  }]);
+
+  if (saveLocation === 'global') {
+    const globalDir = path.resolve(os.homedir(), '.zerohour');
+    if (!fs.existsSync(globalDir)) fs.mkdirSync(globalDir, { recursive: true });
+    const globalEnvPath = path.join(globalDir, '.env');
+    fs.appendFileSync(globalEnvPath, configContent);
+    console.log(chalk.green(`✅ ClickUp configuration saved globally to ${globalEnvPath}`));
+  } else {
+    const envPath = path.resolve(process.cwd(), '.env');
+    fs.appendFileSync(envPath, configContent);
+    console.log(chalk.green('✅ ClickUp configuration saved to local .env'));
+  }
+}
+
+async function runAnalysis(filePath: string, options: any = {}) {
+  // 0. Identity Check
+  let userEmail;
+  try {
+    userEmail = getCurrentUserEmail();
+  } catch (e: any) {
+    console.error(e.message);
+    process.exit(1);
+  }
+
+  // Initialize DB
+  await initDB();
+
   // 1. Check API Key Interactively if missing
   if (!process.env.GROQ_API_KEY) {
     console.log(chalk.yellow('\n⚠️  GROQ_API_KEY not found in .env'));
@@ -128,21 +318,21 @@ async function runAnalysis(filePath: string) {
     }]);
 
     if (saveLocation === 'global') {
-      const globalDir = path.resolve(os.homedir(), '.zerohour');
-      if (!fs.existsSync(globalDir)) {
-        fs.mkdirSync(globalDir, { recursive: true });
-      }
-      const globalEnvPath = path.join(globalDir, '.env');
-      fs.appendFileSync(globalEnvPath, `\nGROQ_API_KEY=${apiKey}\nGROQ_MODEL=llama-3.3-70b-versatile\n`);
-      console.log(chalk.green(`✅ API Key saved globally to ${globalEnvPath}`));
-    } else if (saveLocation === 'local') {
-      const envPath = path.resolve(process.cwd(), '.env');
-      fs.appendFileSync(envPath, `\nGROQ_API_KEY=${apiKey}\nGROQ_MODEL=llama-3.3-70b-versatile\n`);
-      console.log(chalk.green('✅ API Key saved to local .env'));
+    const globalDir = path.resolve(os.homedir(), '.zerohour');
+    if (!fs.existsSync(globalDir)) {
+      fs.mkdirSync(globalDir, { recursive: true });
     }
+    const globalEnvPath = path.join(globalDir, '.env');
+    fs.appendFileSync(globalEnvPath, `\nGROQ_API_KEY=${apiKey}\nGROQ_MODEL=llama-3.3-70b-versatile\n`);
+    console.log(chalk.green(`✅ API Key saved globally to ${globalEnvPath}`));
+  } else if (saveLocation === 'local') {
+    const envPath = path.resolve(process.cwd(), '.env');
+    fs.appendFileSync(envPath, `\nGROQ_API_KEY=${apiKey}\nGROQ_MODEL=llama-3.3-70b-versatile\n`);
+    console.log(chalk.green('✅ API Key saved to local .env'));
   }
+}
 
-  // 2. Run Analysis using Core API
+// 2. Run Analysis using Core API
   spinner.start('Initializing analysis...');
   try {
     const result = await analyzeFindingsFile(filePath, (msg) => {
@@ -165,8 +355,30 @@ async function runAnalysis(filePath: string) {
     // Master list: Top Risks followed by the rest
     const sortedAllFindings = [...topFindings, ...otherFindings];
 
+    // DB Persistence
+    const projectName = options.project || options.projectName || path.basename(process.cwd());
+
     // 4. Display Top Risks (Detailed)
-    displayResults(result);
+    displayResults(result, projectName);
+    
+    spinner.start('Saving results to database...');
+    await saveScanResults(projectName, userEmail, result.topRisks);
+    spinner.succeed('Results saved.');
+
+    // Integrations
+    if (options.createJira) {
+      console.log(chalk.blue('\n--- Jira Integration ---'));
+      for (const risk of result.topRisks) {
+        await createJiraIssue(risk);
+      }
+    }
+
+    if (options.createClickUp) {
+      console.log(chalk.magenta('\n--- ClickUp Integration ---'));
+      for (const risk of result.topRisks) {
+        await createClickUpTask(risk);
+      }
+    }
 
     // 5. Display Remaining Findings (Summary)
     // Start numbering from (topRisks.length + 1)
