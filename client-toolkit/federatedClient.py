@@ -71,7 +71,7 @@ class Config:
     FEDERATED_UPDATE_INTERVAL_SEC: int = 300   # How often to send federated updates (5 min)
     
     # Aggregator endpoint (production server)
-    AGGREGATOR_ENDPOINT: str = "http://143.110.250.168:8000/federated/update"
+    AGGREGATOR_ENDPOINT: str = "http://143.110.250.168:8080/federated/update"
     CLIENT_ID: str = ""  # Auto-generated if empty
     
     # Model settings
