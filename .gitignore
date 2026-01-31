@@ -13,3 +13,8 @@ venv/
 # Project Specific (Generated Output)
 traces/
 *.log
+
+# Data files
+data-n-sensor/*.json
+data-n-sensor/*.csv
+
